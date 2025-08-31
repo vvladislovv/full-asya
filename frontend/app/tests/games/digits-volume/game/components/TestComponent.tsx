@@ -6,9 +6,12 @@ interface TestComponentProps {
     restart: () => void;
     setCurrentTestIndex: (index: number) => void;
     currentTestIndex: number;
+    onNextTest?: () => void;
+    onBackToList?: () => void;
+    onSubmitResults?: (answers: Record<string, any>, correctAnswers: number, totalAnswers: number) => void;
 }
 
-export const DigitsTestComponent: React.FC<TestComponentProps> = ({ randomNumbers, restart, setCurrentTestIndex, currentTestIndex}) => {
+export const DigitsTestComponent: React.FC<TestComponentProps> = ({ randomNumbers, restart, setCurrentTestIndex, currentTestIndex, onNextTest, onBackToList, onSubmitResults}) => {
     // Fisher-Yates shuffle
     function shuffle(array: number[]) {
         const arr = [...array];
@@ -25,6 +28,7 @@ export const DigitsTestComponent: React.FC<TestComponentProps> = ({ randomNumber
     const [currentIndex, setCurrentIndex] = useState(0);
     const [feedback, setFeedback] = useState<{ [key: number]: 'correct' | 'incorrect' }>({});
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
+    const [userAnswers, setUserAnswers] = useState<Record<string, any>>({});
 
     const handleRestart = () => {
         setShowResult(false);
@@ -38,18 +42,38 @@ export const DigitsTestComponent: React.FC<TestComponentProps> = ({ randomNumber
 
     const handleAnswer = (answer: number, index: number) => {
         if (buttonsDisabled) return;
-        if (randomNumbers[currentIndex] === answer) {
+        const isCorrect = randomNumbers[currentIndex] === answer;
+        
+        // Сохраняем ответ пользователя
+        setUserAnswers(prev => ({
+            ...prev,
+            [`question_${currentIndex}`]: {
+                expectedNumber: randomNumbers[currentIndex],
+                userAnswer: answer,
+                isCorrect: isCorrect
+            }
+        }));
+        
+        if (isCorrect) {
             setFeedback(prev => ({ ...prev, [index]: 'correct' }));
             setResult((prev) => prev + 1);
             const nextIndex = currentIndex + 1;
             setCurrentIndex(nextIndex);
             if (nextIndex >= randomNumbers.length) {
                 setButtonsDisabled(true);
+                // Отправляем результаты перед показом результата
+                if (onSubmitResults) {
+                    onSubmitResults(userAnswers, result + 1, randomNumbers.length);
+                }
                 setTimeout(() => setShowResult(true), 500);
             }
         } else {
             setFeedback(prev => ({ ...prev, [index]: 'incorrect' }));
             setButtonsDisabled(true);
+            // Отправляем результаты перед показом результата
+            if (onSubmitResults) {
+                onSubmitResults(userAnswers, result, randomNumbers.length);
+            }
             setTimeout(() => setShowResult(true), 1000);
         }
     };
@@ -110,9 +134,11 @@ export const DigitsTestComponent: React.FC<TestComponentProps> = ({ randomNumber
                     </div>
                 </div>
                 <div className="w-full absolute left-0 bottom-0 p-4 flex flex-col gap-2">
-                    <button onClick={() => window.history.back()} className="cursor-pointer py-[18px] border border-gray-300 rounded-[43px] flex justify-center transition-all duration-300 active:scale-[0.97] bg-gray-50">
-                        <span className="text-[16px] font-[500] text-gray-600">Вернуться к списку тестов</span>
-                    </button>
+                    {onBackToList && (
+                        <button onClick={onBackToList} className="cursor-pointer py-[18px] border border-gray-300 rounded-[43px] flex justify-center transition-all duration-300 active:scale-[0.97] bg-gray-50">
+                            <span className="text-[16px] font-[500] text-gray-600">Вернуться к списку тестов</span>
+                        </button>
+                    )}
                 </div>
             </div>
         );

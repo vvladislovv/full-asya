@@ -62,7 +62,7 @@ export const CountOperationsGame: React.FC<MemoryGameProps> = ({setCurrentTestIn
                     {!ended && "Счётные операции"}
                 </div>
             </div>
-            <div className="pt-20 px-4 pb-4 h-full bg-[#F2F5F9]">
+            <div className="pt-20 px-4 pb-4 h-full bg-white">
                 {!started ? (
                     <TimerComponent started={started} setStarted={setStarted}/>
                 ) : 

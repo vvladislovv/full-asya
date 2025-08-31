@@ -64,11 +64,13 @@ const VisualMemoryGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, curre
                 answers: {
                     correct: correctAnswers,
                     total: totalAnswers,
-                    details: answers
+                    details: answers,
+                    percentage: Math.round((correctAnswers / totalAnswers) * 100)
                 },
                 timeSpent,
                 maxScore: totalAnswers,
-                emotionalState: { mood: 'neutral' }
+                emotionalState: { mood: 'neutral' },
+                testType: 'VISUAL_MEMORY'
             });
             console.log('Результат теста отправлен успешно');
         } catch (error) {
@@ -91,7 +93,7 @@ const VisualMemoryGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, curre
                     {!ended && t('game.memory_diagnostics')}
                 </div>
             </div>
-            <div className="pt-20 px-4 pb-4 h-full bg-[#F2F5F9]">
+            <div className="pt-20 px-4 pb-4 h-full bg-white">
                 {/* Таймер перед стартом */}
                 {!started ? (
                     <TimerComponent started={started} setStarted={setStarted}/>

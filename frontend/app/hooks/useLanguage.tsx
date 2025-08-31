@@ -20,7 +20,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [language, setLanguageState] = useState<Language>('ru');
+  const [language, setLanguageState] = useState<Language>('en');
   const [isLoading, setIsLoading] = useState(false);
   const [translations, setTranslations] = useState<Translations>({});
 
@@ -71,11 +71,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       }
     }
     
-    // Последний резервный вариант: браузер, если не русский - то английский
+    // Последний резервный вариант: английский по умолчанию
     const browserLanguage = navigator.language?.split('-')[0];
     const language: Language = browserLanguage === 'ru' ? 'ru' : 'en';
-    setLanguageState(language);
-    console.log(`🌍 Язык установлен из браузера: ${browserLanguage} -> ${language}`);
+    setLanguageState('en'); // Устанавливаем английский по умолчанию
+    console.log(`🌍 Язык установлен по умолчанию: en (браузер: ${browserLanguage})`);
   }, [user]);
 
   const setLanguage = async (newLanguage: Language) => {

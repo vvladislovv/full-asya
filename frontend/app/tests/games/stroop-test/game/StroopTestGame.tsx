@@ -70,7 +70,7 @@ const StroopTestGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, current
                     {!ended && t('test_types.STROOP_TEST', 'Тест Струпа')}
                 </div>
             </div>
-            <div className="pt-20 px-4 pb-4 h-full bg-[#F2F5F9]">
+            <div className="pt-20 px-4 pb-4 h-full bg-white">
                 {/* Таймер перед стартом */}
                 {!started ? (
                     <TimerComponent started={started} setStarted={setStarted}/>

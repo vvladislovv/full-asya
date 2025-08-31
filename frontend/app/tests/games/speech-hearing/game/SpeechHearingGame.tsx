@@ -67,7 +67,7 @@ const SpeechMemoryGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, curre
                     {!ended && "Рече-слуховая память"}
                 </div>
             </div>
-            <div className="pt-20 px-4 pb-4 h-full bg-[#F2F5F9]">
+            <div className="pt-20 px-4 pb-4 h-full bg-white">
                 {/* Таймер перед стартом */}
                 {!started ? (
                     <TimerComponent started={started} setStarted={setStarted}/>

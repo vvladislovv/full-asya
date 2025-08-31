@@ -32,11 +32,11 @@ export const GameRenderer : React.FC<GameRendererProps> = ({type, test, toggleSh
             case "VISUAL_MEMORY":
                 return <VisualMemoryGame test={test} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "VERBAL_MEMORY":
-                return <VerbalMemoryGame setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
+                return <VerbalMemoryGame test={test} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "AUDITORY_MEMORY":
                 return <SpeechMemoryGame setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "DIGIT_SPAN":
-                return <DigitsVolumeGame setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
+                return <DigitsVolumeGame test={test} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "VISUAL_ATTENTION":
                 return <EyeMemoryGame setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "STROOP_TEST":
@@ -44,7 +44,7 @@ export const GameRenderer : React.FC<GameRendererProps> = ({type, test, toggleSh
             case "ARITHMETIC":
                 return <CountOperationsGame setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "SYMBOL_MEMORY":
-                return <SymbolMemoryGame setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
+                return <SymbolMemoryGame test={test} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             default:
                 return null;
         }

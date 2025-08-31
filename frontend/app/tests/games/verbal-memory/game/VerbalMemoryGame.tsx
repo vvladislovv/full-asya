@@ -77,7 +77,8 @@ const VerbalMemoryGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, curre
                     details: answers
                 },
                 timeSpent,
-                maxScore: totalAnswers
+                maxScore: totalAnswers,
+                testType: 'VERBAL_MEMORY'
             });
         } catch (error) {
             console.error('Ошибка отправки результатов:', error);
@@ -98,7 +99,7 @@ const VerbalMemoryGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, curre
                     {!ended && "Вербальная память"}
                 </div>
             </div>
-            <div className="pt-20 px-4 pb-4 h-full bg-[#F2F5F9]">
+            <div className="pt-20 px-4 pb-4 h-full bg-white">
                 {/* Таймер перед стартом */}
                 {!started ? (
                     <TimerComponent started={started} setStarted={setStarted}/>

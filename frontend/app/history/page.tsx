@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getUserHistory, TestHistoryItem } from "../api/services/testService";
 
+import { autoLoginTestUser } from "../api/services/authService";
 import { useLanguage } from "../hooks/useLanguage";
 import { useAuth } from "../providers/useAuth";
 import { formatDateSafe } from "../utils/dateUtils";
@@ -30,10 +31,37 @@ const History : React.FC = () => {
     // Загрузка истории тестов
     useEffect(() => {
         const loadHistory = async () => {
-            if (!user) return;
-            
             try {
                 setLoading(true);
+                setError(null);
+                
+                // Проверяем наличие токена
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                    console.log('Нет токена авторизации, проверяем локальные данные');
+                    // Загружаем локальные данные
+                    const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
+                    if (localResults.length > 0) {
+                        const formattedHistory: HistoryItem[] = localResults.map((item: any) => ({
+                            id: item.id || `local-${Date.now()}-${Math.random()}`,
+                            date: formatDateSafe(item.completedAt || item.createdAt, 'ru-RU', 'Дата недоступна'),
+                            testType: item.testType || 'UNKNOWN',
+                            testName: t(`test_types.${item.testType}`, item.testName || 'Неизвестный тест'),
+                            score: item.score || 0,
+                            maxScore: item.maxScore || 10,
+                            percentage: item.percentage || ((item.score || 0) / (item.maxScore || 10)) * 100,
+                            resultLevel: item.resultLevel || getResultLevel(item.score || 0, item.maxScore || 10),
+                            status: item.isCompleted ? 'completed' : 'in_progress'
+                        }));
+                        setHistoryData(formattedHistory);
+                    } else {
+                        setHistoryData([]);
+                    }
+                    setLoading(false);
+                    return;
+                }
+                
+                // Если есть токен, пробуем загрузить с бэкенда
                 const response: TestHistoryItem[] = await getUserHistory({ limit: 50 });
                 
                 // getUserHistory уже возвращает массив или пустой массив при ошибке
@@ -52,9 +80,26 @@ const History : React.FC = () => {
                 setHistoryData(formattedHistory);
             } catch (error) {
                 console.error('Ошибка загрузки истории:', error);
-                setError('Не удалось загрузить историю тестов');
-                // getUserHistory уже обрабатывает ошибки и возвращает пустой массив
-                setHistoryData([]);
+                // Пробуем загрузить локальные данные при ошибке
+                const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
+                if (localResults.length > 0) {
+                    const formattedHistory: HistoryItem[] = localResults.map((item: any) => ({
+                        id: item.id || `local-${Date.now()}-${Math.random()}`,
+                        date: formatDateSafe(item.completedAt || item.createdAt, 'ru-RU', 'Дата недоступна'),
+                        testType: item.testType || 'UNKNOWN',
+                        testName: t(`test_types.${item.testType}`, item.testName || 'Неизвестный тест'),
+                        score: item.score || 0,
+                        maxScore: item.maxScore || 10,
+                        percentage: item.percentage || ((item.score || 0) / (item.maxScore || 10)) * 100,
+                        resultLevel: item.resultLevel || getResultLevel(item.score || 0, item.maxScore || 10),
+                        status: item.isCompleted ? 'completed' : 'in_progress'
+                    }));
+                    setHistoryData(formattedHistory);
+                    setError(null); // Убираем ошибку, если есть локальные данные
+                } else {
+                    setError('Не удалось загрузить историю тестов. Попробуйте перезагрузить страницу.');
+                    setHistoryData([]);
+                }
             } finally {
                 setLoading(false);
             }
@@ -125,9 +170,31 @@ const History : React.FC = () => {
 
             {/* Ошибка */}
             {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
-                    <span>⚠️</span>
-                    <p className="text-[14px]">{error}</p>
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span>⚠️</span>
+                        <p className="text-[14px]">{error}</p>
+                    </div>
+                    <button
+                        onClick={async () => {
+                            setError(null);
+                            setLoading(true);
+                            try {
+                                // Попробуем авторизоваться заново
+                                const result = await autoLoginTestUser();
+                                if (result) {
+                                    // Перезагружаем страницу для обновления контекста
+                                    window.location.reload();
+                                }
+                            } catch (err) {
+                                setError('Не удалось авторизоваться. Попробуйте позже.');
+                                setLoading(false);
+                            }
+                        }}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-[14px] font-medium"
+                    >
+                        Попробовать снова
+                    </button>
                 </div>
             )}
 

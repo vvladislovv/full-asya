@@ -89,7 +89,8 @@ const SymbolMemoryGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurre
                     percentage: percentage
                 },
                 timeSpent,
-                maxScore: totalAnswers
+                maxScore: totalAnswers,
+                testType: 'SYMBOL_MEMORY'
             });
             
             console.log('✅ Результат теста успешно отправлен:', submitResult);
@@ -151,7 +152,7 @@ const SymbolMemoryGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurre
                 </div>
             )}
             
-            <div className="pt-20 px-4 pb-4 h-full bg-[#F2F5F9]">
+            <div className="pt-20 px-4 pb-4 h-full bg-white">
                 {/* Таймер перед стартом */}
                 {!started ? (
                     <TimerComponent started={started} setStarted={setStarted}/>

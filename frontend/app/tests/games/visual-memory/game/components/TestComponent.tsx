@@ -173,7 +173,7 @@ export const TestComponent : React.FC<TestComponentProps> = ({initialTimer, rand
                         alt="Картинка" 
                         width={200} 
                         height={200} 
-                        style={{objectFit: 'contain', width: 'auto', height: 'auto'}}
+                        style={{objectFit: 'contain', width: "auto", height: "auto"}}
                         onError={(e) => {
                             console.error('Image failed to load:', allImages[currentIndex]);
                             e.currentTarget.src = '/images/apple.png'; // fallback image

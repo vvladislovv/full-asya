@@ -30,14 +30,14 @@ export interface TestHistoryItem {
 
 export async function getTests() : Promise<Test[]> {
     try {
-        const response = await apiFetch<Test[]>("/tests", {
+        const response = await apiFetch<Test[] | Record<string, Test>>("/tests", {
             method: 'GET'
         });
         
         // Backend возвращает объект, а не массив, поэтому преобразуем
         if (response && typeof response === 'object' && !Array.isArray(response)) {
             const testsArray = Object.values(response);
-            console.log('✅ Получены тесты с backend:', testsArray.length);
+            console.log('✅ Получены тесты с backend (объект):', testsArray.length);
             return testsArray;
         }
         
@@ -63,12 +63,19 @@ export async function getTestByType(type: string) : Promise<Test> {
 // Получение истории тестов пользователя
 export async function getUserHistory(params?: { limit?: number; offset?: number }): Promise<TestHistoryItem[]> {
     try {
-        // Сначала пробуем получить с backend
-        const response = await apiFetch<TestHistoryItem[]>(`/history${params ? `?${new URLSearchParams(params as any).toString()}` : ''}`, {
+        // Получаем историю с backend
+        const query = new URLSearchParams();
+        if (params?.limit) query.append('limit', params.limit.toString());
+        if (params?.offset) query.append('offset', params.offset.toString());
+        
+        const response = await apiFetch<TestHistoryItem[]>(`/history?${query.toString()}`, {
             method: 'GET'
         });
         
+        console.log('📋 История с backend:', response);
+        
         if (Array.isArray(response) && response.length > 0) {
+            console.log('✅ Получено', response.length, 'результатов из БД');
             return response;
         }
     } catch (error) {
@@ -79,6 +86,7 @@ export async function getUserHistory(params?: { limit?: number; offset?: number 
     if (typeof window !== 'undefined') {
         const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
         const { limit = 50, offset = 0 } = params || {};
+        console.log('📱 Используем локальные данные:', localResults.length, 'результатов');
         return localResults.slice(offset, offset + limit);
     }
     
@@ -88,16 +96,29 @@ export async function getUserHistory(params?: { limit?: number; offset?: number 
 // Получение статистики пользователя
 export async function getUserStats(): Promise<UserStatsResponse> {
     try {
-        // Сначала пробуем получить с backend
-        const response = await apiFetch<UserStatsResponse>('/history/stats', {
+        // Получаем статистику с backend - используем query parameter period=all для получения всех данных
+        const response = await apiFetch<any>('/history/stats?period=all', {
             method: 'GET'
         });
         
-        if (response && response.totalTests > 0) {
-            return response;
+        console.log('📊 Статистика с backend:', response);
+        
+        if (response) {
+            // Преобразуем в нужный формат
+            const stats: UserStatsResponse = {
+                totalTests: 8, // Всегда 8 тестов в системе
+                completedTests: response.totalTests || response.completedTests || 0,
+                averageScore: Math.round(response.averageScore || 0),
+                lastTestDate: response.lastTestDate,
+                riskLevel: response.riskLevel || 'low'
+            };
+            
+            console.log('✅ Получена статистика с backend:', stats);
+            return stats;
         }
     } catch (error) {
         console.warn('Ошибка загрузки статистики с backend, используем локальные данные:', error);
+        console.error('Детали ошибки:', error);
     }
     
     // Если backend не работает или нет данных, используем локальные
@@ -114,7 +135,7 @@ export async function getUserStats(): Promise<UserStatsResponse> {
             const lastTestDate = completedTests[0].completedAt;
             
             console.log('📊 Локальная статистика:', {
-                totalTests,
+                totalTests: 8,
                 completedTests: totalTests,
                 averageScore,
                 lastTestDate,
@@ -122,7 +143,7 @@ export async function getUserStats(): Promise<UserStatsResponse> {
             });
             
             return {
-                totalTests,
+                totalTests: 8, // Всего 8 тестов в системе
                 completedTests: totalTests,
                 averageScore,
                 lastTestDate,
@@ -132,7 +153,7 @@ export async function getUserStats(): Promise<UserStatsResponse> {
     }
     
     return {
-        totalTests: 0,
+        totalTests: 8, // Всего 8 тестов в системе
         completedTests: 0,
         averageScore: 0,
         lastTestDate: null,
@@ -156,10 +177,27 @@ export async function getTestProgress(testType: string, days: number = 30) {
 
 // Начать тест
 export async function startTest(testId: string) {
-    return await apiFetch('/tests/start', {
-        method: 'POST',
-        body: JSON.stringify({ testId })
-    });
+    try {
+        console.log('🎯 Начинаем тест с ID:', testId);
+        const result = await apiFetch('/tests/start', {
+            method: 'POST',
+            body: JSON.stringify({ testId })
+        });
+        console.log('✅ Тест начат, получен результат:', result);
+        return result;
+    } catch (error) {
+        console.error('❌ Ошибка начала теста:', error);
+        // Создаем локальный результат как fallback
+        const fallbackResult = {
+            id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            userId: 'local_user',
+            testId: testId,
+            isCompleted: false,
+            createdAt: new Date().toISOString()
+        };
+        console.log('📱 Создан локальный fallback результат:', fallbackResult);
+        return fallbackResult;
+    }
 }
 
 // Отправить результат теста
@@ -169,54 +207,93 @@ export async function submitTestResult(data: {
     timeSpent: number;
     maxScore?: number;
     emotionalState?: Record<string, any>;
+    testType?: string;
 }) {
-    // ВСЕГДА сохраняем результат локально для отображения в истории
-    if (typeof window !== 'undefined') {
-        const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
-        
-        // Правильно рассчитываем процент
-        const correctAnswers = data.answers.correct || 0;
-        const totalAnswers = data.answers.total || 1;
-        const percentage = Math.round((correctAnswers / totalAnswers) * 100);
-        
-        // Определяем уровень результата
-        let resultLevel = 'medium';
-        if (percentage >= 75) resultLevel = 'high';
-        else if (percentage >= 50) resultLevel = 'medium';
-        else resultLevel = 'low';
-        
-        const newResult = {
-            id: data.resultId,
-            createdAt: new Date().toISOString(),
-            completedAt: new Date().toISOString(),
-            testType: 'SYMBOL_MEMORY',
-            score: correctAnswers,
-            maxScore: totalAnswers,
-            percentage: percentage, // Правильный процент
-            isCompleted: true,
-            resultLevel: resultLevel,
-            timeSpent: data.timeSpent,
-            details: data.answers.details || {}
-        };
-        
-        localResults.unshift(newResult);
-        localStorage.setItem('test_results', JSON.stringify(localResults));
-        console.log('✅ Результат теста сохранен локально:', newResult);
-        
-        // Обновляем общую статистику
-        updateLocalStats();
-    }
+    console.log('📤 Отправка результата теста:', data);
     
-    // Пытаемся отправить на backend
+    // Правильно рассчитываем процент и scores
+    const correctAnswers = data.answers.correct || 0;
+    const totalAnswers = data.answers.total || data.maxScore || 1;
+    const percentage = Math.round((correctAnswers / totalAnswers) * 100);
+    
+    // Определяем уровень результата
+    let resultLevel: 'high' | 'medium' | 'low' = 'medium';
+    if (percentage >= 75) resultLevel = 'high';
+    else if (percentage >= 50) resultLevel = 'medium';
+    else resultLevel = 'low';
+
+    // Пытаемся отправить на backend СНАЧАЛА
     try {
         const backendResult = await apiFetch('/tests/submit', {
             method: 'POST',
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                ...data,
+                answers: {
+                    ...data.answers,
+                    correct: correctAnswers,
+                    total: totalAnswers
+                }
+            })
         });
+        
         console.log('✅ Результат отправлен на backend:', backendResult);
+        
+        // Если backend успешно принял результат, сохраняем локально для синхронизации
+        if (typeof window !== 'undefined') {
+            const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
+            
+            const newResult = {
+                id: data.resultId,
+                createdAt: new Date().toISOString(),
+                completedAt: new Date().toISOString(),
+                testType: data.testType || 'UNKNOWN',
+                score: correctAnswers,
+                maxScore: totalAnswers,
+                percentage: percentage,
+                isCompleted: true,
+                resultLevel: resultLevel,
+                timeSpent: data.timeSpent,
+                details: data.answers
+            };
+            
+            localResults.unshift(newResult);
+            localStorage.setItem('test_results', JSON.stringify(localResults));
+            console.log('✅ Результат синхронизирован локально:', newResult);
+            
+            // Обновляем общую статистику
+            updateLocalStats();
+        }
+        
         return backendResult;
     } catch (error) {
-        console.warn('⚠️ Не удалось отправить результат на backend, но он сохранен локально:', error);
+        console.warn('⚠️ Не удалось отправить результат на backend, сохраняем локально:', error);
+        
+        // ВСЕГДА сохраняем результат локально для отображения в истории
+        if (typeof window !== 'undefined') {
+            const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
+            
+            const newResult = {
+                id: data.resultId,
+                createdAt: new Date().toISOString(),
+                completedAt: new Date().toISOString(),
+                testType: data.testType || 'UNKNOWN',
+                score: correctAnswers,
+                maxScore: totalAnswers,
+                percentage: percentage,
+                isCompleted: true,
+                resultLevel: resultLevel,
+                timeSpent: data.timeSpent,
+                details: data.answers
+            };
+            
+            localResults.unshift(newResult);
+            localStorage.setItem('test_results', JSON.stringify(localResults));
+            console.log('✅ Результат сохранен локально (fallback):', newResult);
+            
+            // Обновляем общую статистику
+            updateLocalStats();
+        }
+        
         // Возвращаем локальный результат
         return { id: data.resultId, success: true, local: true };
     }

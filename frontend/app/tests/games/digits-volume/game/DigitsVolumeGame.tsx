@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { startTest, submitTestResult } from "@/app/api/services/testService";
+import React, { useCallback, useEffect, useState } from "react";
 import { MemoryGameProps } from "../../GameRenderer";
 import { TimerComponent } from "../../visual-memory/game/components/TimerComponent";
 import { DigitsGameComponent } from "./components/GameComponent";
@@ -12,9 +13,11 @@ const seededRandom = (seed: number) => {
     return x - Math.floor(x);
 };
 
-const DigitsVolumeGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurrentTestIndex}: MemoryGameProps) => {
+const DigitsVolumeGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurrentTestIndex, test, onNextTest, onBackToList}: MemoryGameProps) => {
     // Набор чисел для игры. Можно добавлять или изменять.
     const [randomNumbers, setRandomNumbers] = useState<number[]>([]);
+    const [testResultId, setTestResultId] = useState<string | null>(null);
+    const [startTime, setStartTime] = useState<number>(0);
 
     const [started, setStarted] = useState(false);
     const [ended, setEnded] = useState(false);
@@ -32,7 +35,49 @@ const DigitsVolumeGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurre
     // Инициализация и обновление при смене уровня
     useEffect(() => {
         generateRandomNumbers();
-    }, [currentTestIndex]);
+        
+        // Начинаем тест при загрузке компонента
+        const initializeTest = async () => {
+            if (test?.id) {
+                try {
+                    const result = await startTest(test.id);
+                    setTestResultId(result.id);
+                    setStartTime(Date.now());
+                } catch (error) {
+                    console.error('Ошибка начала теста:', error);
+                }
+            }
+        };
+        
+        initializeTest();
+    }, [currentTestIndex, test?.id]);
+
+    // Функция отправки результатов
+    const handleSubmitResults = useCallback(async (answers: Record<string, any>, correctAnswers: number, totalAnswers: number) => {
+        if (!testResultId) {
+            console.error('Test result ID not found');
+            return;
+        }
+
+        const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+        
+        try {
+            await submitTestResult({
+                resultId: testResultId,
+                answers: {
+                    correct: correctAnswers,
+                    total: totalAnswers,
+                    details: answers
+                },
+                timeSpent,
+                maxScore: totalAnswers,
+                testType: 'DIGIT_SPAN'
+            });
+            console.log('Результат теста отправлен успешно');
+        } catch (error) {
+            console.error('Ошибка отправки результата теста:', error);
+        }
+    }, [testResultId, startTime]);
 
     // Функция перезапуска
     const restart = () => {
@@ -48,14 +93,14 @@ const DigitsVolumeGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurre
                     {!ended && "Объем цифр"}
                 </div>
             </div>
-            <div className="pt-20 px-4 pb-4 h-full bg-[#F2F5F9]">
+            <div className="pt-20 px-4 pb-4 h-full bg-white">
                 {!started ? (
                     <TimerComponent started={started} setStarted={setStarted}/>
                 ) : 
                 !ended ?  (
                     <DigitsGameComponent randomNumbers={randomNumbers} setGameEnded={setEnded}/>
                 ) : (
-                    <DigitsTestComponent randomNumbers={randomNumbers} restart={restart} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} />
+                    <DigitsTestComponent randomNumbers={randomNumbers} restart={restart} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList} onSubmitResults={handleSubmitResults} />
                 )}
             </div>
         </div>

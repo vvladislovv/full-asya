@@ -118,10 +118,10 @@ export function initTelegramWebApp(): void {
 export function createTestTelegramUser(): TelegramUser {
   return {
     id: 123456789,
-    first_name: 'Тестовый',
-    last_name: 'Пользователь',
+    first_name: 'Test',
+    last_name: 'User',
     username: 'test_user',
-    language_code: 'ru'
+    language_code: 'en'
   };
 }
 

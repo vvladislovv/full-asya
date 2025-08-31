@@ -70,7 +70,7 @@ export function AuthProvider({children} : {children: ReactNode}) {
                             lastName: telegramUser.last_name,
                             username: telegramUser.username,
                             telegramPhotoUrl: telegramPhotoUrl,
-                            language: telegramUser.language_code || 'ru'
+                            language: telegramUser.language_code || 'en'
                         };
                         setUser(enrichedUser);
                     }

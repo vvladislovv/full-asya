@@ -8,6 +8,7 @@ import { useLanguage } from "../hooks/useLanguage";
 import { useAuth } from "../providers/useAuth";
 import ErrorScreen from "../ui/errorScreen";
 import Spinner from "../ui/spinner";
+import AutoTestRunner from "./auto-test-runner";
 import { GameRenderer, GameTypeEnum } from "./games/GameRenderer";
 import TestInformation from "./testInfo/info";
 
@@ -151,6 +152,7 @@ const Tests: React.FC = () => {
     // состояния для навигации по тестам
     const [showTestInfo, setShowTestInfo] = useState(false);
     const [showGame, setShowGame] = useState(false);
+    const [showAutoTest, setShowAutoTest] = useState(false);
     
     const toggleShowGame = () => {
         setShowGame(!showGame);
@@ -224,6 +226,10 @@ const Tests: React.FC = () => {
         return <ErrorScreen message={error} />;
     }
 
+    if (showAutoTest) {
+        return <AutoTestRunner onComplete={() => setShowAutoTest(false)} />;
+    }
+    
     if (showTestInfo) {
         if (showGame) {
             return (
@@ -284,6 +290,14 @@ const Tests: React.FC = () => {
                         <p className="text-xs text-gray-700 mt-1">
                             Найдено тестов: {tests.length}
                         </p>
+                        
+                        {/* Кнопка автотестирования */}
+                        <button
+                            onClick={() => setShowAutoTest(true)}
+                            className="mt-3 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            🤖 Автотест всех 8 тестов
+                        </button>
                     </div>
                     
                     {tests.map((test, index) => (
