@@ -1,0 +1,188 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --complimentary: #E8ECF5;
+  --green: #8DC63F;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+@font-face {
+  font-family: 'SF Pro Text';
+  src: url('/fonts/SFProText/SFProText-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  src: url('/fonts/SFProText/SFProText-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  src: url('/fonts/SFProText/SFProText-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* Темная тема */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+.dark body {
+  background: #1a1a1a;
+}
+
+.dark .bg-\[\#F2F5F9\] {
+  background-color: #1a1a1a;
+}
+
+.dark .bg-white {
+  background-color: #2d2d2d;
+}
+
+.dark .text-gray-800 {
+  color: #e5e5e5;
+}
+
+.dark .text-gray-500 {
+  color: #a3a3a3;
+}
+
+.dark .border-gray-100 {
+  border-color: #404040;
+}
+
+.dark .bg-gray-200 {
+  background-color: #404040;
+}
+
+.dark .peer-checked\:bg-\[#8DC63F\]:checked {
+  background-color: #8DC63F;
+}
+
+.dark .peer-checked\:bg-purple-600:checked {
+  background-color: #9333ea;
+}
+
+.dark .bg-blue-100 {
+  background-color: #1e3a8a;
+}
+
+.dark .bg-purple-100 {
+  background-color: #581c87;
+}
+
+.dark .bg-green-100 {
+  background-color: #166534;
+}
+
+.dark .text-blue-600 {
+  color: #93c5fd;
+}
+
+.dark .text-purple-600 {
+  color: #c084fc;
+}
+
+.dark .text-green-600 {
+  color: #86efac;
+}
+
+.dark .bg-red-500 {
+  background-color: #dc2626;
+}
+
+.dark .hover\:bg-red-600:hover {
+  background-color: #b91c1c;
+}
+
+.dark .border-\[#8DC63F\] {
+  border-color: #8DC63F;
+}
+
+/* Фокус переключателей в темной теме */
+.dark .peer:focus-within .peer-focus\:ring-blue-300 {
+  --tw-ring-color: #1e40af;
+}
+
+.dark .peer:focus-within .peer-focus\:ring-purple-300 {
+  --tw-ring-color: #7c3aed;
+}
+
+.dark .peer:focus-within .peer-focus\:ring-green-300 {
+  --tw-ring-color: #16a34a;
+}
+
+.dark .peer-focus\:ring-blue-300:focus {
+  --tw-ring-color: #1e40af;
+}
+
+.dark .peer-focus\:ring-purple-300:focus {
+  --tw-ring-color: #7c3aed;
+}
+
+.dark .peer-focus\:ring-green-300:focus {
+  --tw-ring-color: #16a34a;
+}
+
+body {
+  font-family: 'SF Pro Text', Arial, sans-serif;
+  padding: 0;
+  margin: 0;
+  background: #E8ECF5;
+  color: #1E1E1E; /* Принудительно устанавливаем черный цвет текста */
+}
+/* Убираем стрелки для текстого поля с числовым типом  */
+@layer base {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+/* Анимации для blob эффектов */
+@keyframes blob {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}

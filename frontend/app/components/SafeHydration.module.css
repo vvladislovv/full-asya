@@ -1,0 +1,52 @@
+/* Стили для компонента SafeHydration */
+.safeHydrationFallback {
+  /* Стили для состояния загрузки */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  width: 100%;
+}
+
+.safeHydrationContainer {
+  /* Основные стили */
+  width: 100%;
+  height: 100%;
+}
+
+/* Анимация для fallback */
+@keyframes fallbackFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.safeHydrationFallback {
+  animation: fallbackFadeIn 0.3s ease-out;
+}
+
+/* Стили для состояния загрузки */
+.safeHydrationFallback .loadingSpinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .safeHydrationFallback {
+    min-height: 150px;
+  }
+}

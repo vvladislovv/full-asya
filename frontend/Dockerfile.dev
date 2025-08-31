@@ -1,0 +1,19 @@
+# Dockerfile для разработки фронтенда
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Устанавливаем curl для health checks
+RUN apk add --no-cache curl
+
+# Установка зависимостей
+COPY package*.json ./
+RUN npm install
+
+# Копирование исходного кода
+COPY . .
+
+EXPOSE 5173
+
+# Команда для разработки (будет переопределена в docker-compose)
+CMD ["npm", "run", "dev"]

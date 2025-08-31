@@ -1,0 +1,313 @@
+// Prisma схема для DrAsya Backend
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Language {
+  ru
+  en
+}
+
+enum DementiaRiskLevel {
+  low
+  medium
+  high
+}
+
+enum TestType {
+  VISUAL_MEMORY
+  VERBAL_MEMORY
+  AUDITORY_MEMORY
+  DIGIT_SPAN
+  VISUAL_ATTENTION
+  STROOP_TEST
+  ARITHMETIC
+  SYMBOL_MEMORY
+}
+
+enum TestDifficulty {
+  easy
+  medium
+  hard
+}
+
+enum TestResultLevel {
+  high
+  medium
+  low
+}
+
+enum ConsultationType {
+  online
+  offline
+}
+
+enum ConsultationStatus {
+  pending
+  confirmed
+  cancelled
+  completed
+}
+
+model User {
+  id                      String             @id @default(uuid())
+  telegramId              String             @unique
+  username                String?
+  firstName               String?
+  lastName                String?
+  language                Language           @default(ru)
+  dementiaRiskLevel       DementiaRiskLevel?
+  dementiaQuestionnaire   Json?
+  hasCompletedDiagnostic  Boolean            @default(false)
+  isActive                Boolean            @default(true)
+  isAdmin                 Boolean            @default(false)
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+
+  // Отношения
+  testResults             TestResult[]
+  consultations           Consultation[]
+  practiceProgress        PracticeProgress[]
+  dementiaScreenings      DementiaScreening[]
+  emotionalAssessments    EmotionalAssessment[]
+  questionnaires          Questionnaire[]
+  questionnaireResults    QuestionnaireResult[]
+
+  @@map("users")
+}
+
+model Test {
+  id            String          @id @default(uuid())
+  type          TestType        @unique
+  name          String
+  description   String
+  instruction   String
+  difficulty    TestDifficulty  @default(medium)
+  configuration Json?
+  isActive      Boolean         @default(true)
+  orderIndex    Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  // Отношения
+  testResults   TestResult[]
+
+  @@map("tests")
+}
+
+model TestResult {
+  id             String            @id @default(uuid())
+  userId         String
+  testId         String
+  testType       TestType
+  score          Int               @default(0)
+  maxScore       Int?
+  percentage     Float?
+  resultLevel    TestResultLevel?
+  details        Json?             // Ответы пользователя
+  emotionalState Json?             // Эмоциональное состояние
+  notes          String?
+  isCompleted    Boolean           @default(false)
+  completedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  // Отношения
+  user                    User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  test                    Test                      @relation(fields: [testId], references: [id])
+  emotionalAssessments    EmotionalAssessment[]
+
+  @@map("test_results")
+}
+
+model Consultation {
+  id           String             @id @default(uuid())
+  userId       String
+  type         ConsultationType   @default(online)
+  status       ConsultationStatus @default(pending)
+  scheduledAt  DateTime?
+  notes        String?
+  doctorNotes  String?
+  meetingLink  String?
+  location     String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  // Отношения
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("consultations")
+}
+
+model Practice {
+  id           String             @id @default(uuid())
+  name         String
+  description  String
+  category     String
+  difficulty   TestDifficulty     @default(medium)
+  exercises    Json               // Массив упражнений
+  isActive     Boolean            @default(true)
+  orderIndex   Int                @default(0)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  // Отношения
+  progress     PracticeProgress[]
+
+  @@map("practices")
+}
+
+model PracticeProgress {
+  id           String    @id @default(uuid())
+  userId       String
+  practiceId   String
+  exerciseId   String
+  score        Int       @default(0)
+  completed    Boolean   @default(false)
+  timeSpent    Int?      // в секундах
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Отношения
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  practice     Practice  @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, practiceId, exerciseId])
+  @@map("practice_progress")
+}
+
+model TestSession {
+  id          String    @id @default(uuid())
+  userId      String
+  testType    TestType
+  sessionData Json      // Данные сессии теста
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("test_sessions")
+}
+
+model UserStats {
+  id                    String   @id @default(uuid())
+  userId                String   @unique
+  totalTestsCompleted   Int      @default(0)
+  averageScore          Float?
+  bestScore             Int?
+  totalTimeSpent        Int      @default(0) // в секундах
+  streakDays            Int      @default(0)
+  lastActivityDate      DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("user_stats")
+}
+
+model SystemSettings {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+// Диагностическая анкета на выявление рисков деменции
+model DementiaScreening {
+  id              String             @id @default(uuid())
+  userId          String
+  responses       Json               // Ответы на вопросы анкеты
+  totalScore      Int                @default(0)
+  riskLevel       DementiaRiskLevel  @default(low)
+  recommendations Json?              // Рекомендации по результатам
+  completedAt     DateTime           @default(now())
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  // Отношения
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("dementia_screenings")
+}
+
+// Этапы прохождения тестов (5 этапов для каждого теста)
+model TestStage {
+  id            String      @id @default(uuid())
+  testType      TestType
+  stage         Int         // 1-5 (описание, инструкция, тренировка, основной тест, результат)
+  title         Json        // Мультиязычные заголовки
+  content       Json        // Мультиязычный контент
+  configuration Json?       // Конфигурация для этапа
+  isActive      Boolean     @default(true)
+  orderIndex    Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([testType, stage])
+  @@map("test_stages")
+}
+
+// Модель для оценки эмоционального состояния
+model EmotionalAssessment {
+  id              String           @id @default(uuid())
+  userId          String
+  testResultId    String?          // Связь с результатом теста (опционально)
+  responses       Json             // Ответы на вопросы эмоциональной оценки
+  emotionalScore  Int              @default(0)
+  emotionalState  String?          // Общая оценка состояния
+  recommendations Json?            // Рекомендации
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // Отношения
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  testResult      TestResult?      @relation(fields: [testResultId], references: [id], onDelete: SetNull)
+
+  @@map("emotional_assessments")
+}
+
+// Модель для анкет от бота
+model Questionnaire {
+  id          String    @id @default(uuid())
+  userId      String
+  telegramId  Int
+  answers     Json      // Ответы на вопросы анкеты
+  status      String    @default("PENDING") // PENDING, COMPLETED, FAILED
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Отношения
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  result      QuestionnaireResult?
+
+  @@map("questionnaires")
+}
+
+// Модель для результатов анкет от бота
+model QuestionnaireResult {
+  id              String   @id @default(uuid())
+  userId          String
+  telegramId      Int
+  questionnaireId String?  @unique
+  riskLevel       String?  // Уровень риска
+  score           Int?      // Общий балл
+  recommendations Json?     // Рекомендации
+  completedAt     DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Отношения
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionnaire   Questionnaire? @relation(fields: [questionnaireId], references: [id], onDelete: SetNull)
+
+  @@map("questionnaire_results")
+}

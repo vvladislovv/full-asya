@@ -1,0 +1,44 @@
+.equalizer {
+    display: flex;
+    align-items: center; /* Выравниваем по центру по вертикали */
+    justify-content: center; /* Распределяем полоски равномерно */
+    height: 100%;
+    width: 100%;
+    gap: 4px; /* Небольшой отступ между полосками */
+}
+
+.bar {
+    width: 4px; /* Полоски будут растягиваться */
+    background-color: #8DC63F;
+    border-radius: 30px;
+    animation: pulse 1.6s infinite ease-in;
+}
+
+.dotsContainer {
+    display: flex;
+    justify-content: center; /* Распределяем точки равномерно */
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    gap: 4px;
+}
+
+.dot {
+    width: 4px;
+    height: 4px;
+    background-color: #E0E4E9; /* Серый цвет для точек */
+    border-radius: 50%;
+    flex-shrink: 0; /* Запрещаем точкам сжиматься */
+}
+
+@keyframes pulse {
+    0% {
+        height: 4px;
+    }
+    50% {
+        height: 100%;
+    }
+    100% {
+        height: 4px;
+    }
+}

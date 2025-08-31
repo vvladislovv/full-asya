@@ -1,0 +1,113 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "back": "Back",
+        "next": "Next",
+        "start": "Start",
+        "finish": "Finish",
+        "save": "Save",
+        "cancel": "Cancel",
+        "user": "User"
+    },
+    "auth": {
+        "welcome": "Welcome",
+        "login_prompt": "Sign in to your account",
+        "telegram_id": "Telegram ID",
+        "enter_telegram_id": "Enter Telegram ID",
+        "login": "Sign In",
+        "logging_in": "Signing in...",
+        "success": "You are signed in",
+        "error": "Login error",
+        "unauthorized": "Unauthorized",
+        "invalid_credentials": "Invalid credentials"
+    },
+    "home": {
+        "greeting": "Hello",
+        "description": "I am Dr. Asya, your personal virtual assistant. I suggest you undergo a comprehensive diagnosis to assess memory and identify dementia risks.",
+        "tests_and_practices": "Tests and Practices",
+        "tests_description": "Memory diagnostics and dementia risk assessment",
+        "history": "History",
+        "profile": "Profile",
+        "consultation": "Book Consultation"
+    },
+    "profile": {
+        "title": "Profile",
+        "basic_plan": "Basic Plan",
+        "expires": "Expires on",
+        "personal_program": "personal development program",
+        "specialist_chat": "chat with specialist"
+    },
+    "history": {
+        "title": "History",
+        "no_data": "No data",
+        "test_completed": "Test completed",
+        "loading_history": "Loading history...",
+        "error_loading": "Error loading history"
+    },
+    "tests": {
+        "title": "Tests and Practices",
+        "start_test": "Start Test",
+        "loading_tests": "Loading tests...",
+        "no_tests": "No tests found",
+        "difficulty": {
+            "easy": "Easy",
+            "medium": "Medium",
+            "hard": "Hard"
+        },
+        "status": {
+            "not_started": "Not Started",
+            "in_progress": "In Progress",
+            "completed": "Completed"
+        }
+    },
+    "test_types": {
+        "VISUAL_MEMORY": "Visual Memory",
+        "VERBAL_MEMORY": "Verbal Memory",
+        "AUDITORY_MEMORY": "Auditory Memory",
+        "DIGIT_SPAN": "Digit Span",
+        "VISUAL_ATTENTION": "Visual Attention",
+        "STROOP_TEST": "Stroop Test",
+        "ARITHMETIC": "Arithmetic",
+        "SYMBOL_MEMORY": "Symbol Memory"
+    },
+    "test_descriptions": {
+        "VISUAL_MEMORY": "Test to assess the ability to remember and reproduce visual information",
+        "VERBAL_MEMORY": "Test to assess the ability to remember and reproduce verbal information",
+        "AUDITORY_MEMORY": "Test to assess the ability to remember and reproduce auditory information",
+        "DIGIT_SPAN": "Test to assess short-term memory capacity for digital information",
+        "VISUAL_ATTENTION": "Test to assess the ability to concentrate attention on visual stimuli",
+        "STROOP_TEST": "Test to assess cognitive control and inhibition of automatic reactions",
+        "ARITHMETIC": "Test to assess the ability to perform mental mathematical calculations",
+        "SYMBOL_MEMORY": "Test to assess the ability to remember correspondences between symbols and values"
+    },
+    "results": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "score": "Score",
+        "percentage": "Percentage",
+        "time_spent": "Time spent",
+        "correct_answers": "Correct answers",
+        "total_questions": "Total questions"
+    },
+    "consultations": {
+        "title": "Consultations",
+        "book_consultation": "Book Consultation",
+        "online": "Online",
+        "offline": "Offline",
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "cancelled": "Cancelled",
+        "completed": "Completed"
+    },
+    "errors": {
+        "not_found": "Not found",
+        "unauthorized": "Unauthorized",
+        "forbidden": "Access denied",
+        "internal_error": "Internal server error",
+        "validation_error": "Validation error",
+        "network_error": "Network error"
+    }
+}

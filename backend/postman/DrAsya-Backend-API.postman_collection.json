@@ -1,0 +1,872 @@
+{
+    "info": {
+        "name": "DrAsya Backend API",
+        "description": "Полная коллекция API endpoints для системы когнитивных тестов DrAsya с автоматическими данными",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "version": "2.0.0"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{jwt_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Автоматическая генерация данных для тестов",
+                    "pm.globals.set('base_url', 'http://localhost:3000');",
+                    "pm.globals.set('telegram_id', Math.floor(Math.random() * 1000000000).toString());",
+                    "pm.globals.set('timestamp', new Date().toISOString());",
+                    "pm.globals.set('random_string', Math.random().toString(36).substring(7));",
+                    "pm.globals.set('random_number', Math.floor(Math.random() * 100) + 1);",
+                    "",
+                    "// Генерация случайных имен",
+                    "const firstNames = ['Иван', 'Мария', 'Александр', 'Елена', 'Дмитрий', 'Анна', 'Сергей', 'Ольга'];",
+                    "const lastNames = ['Иванов', 'Петрова', 'Сидоров', 'Козлова', 'Смирнов', 'Федорова', 'Попов', 'Морозова'];",
+                    "pm.globals.set('random_first_name', firstNames[Math.floor(Math.random() * firstNames.length)]);",
+                    "pm.globals.set('random_last_name', lastNames[Math.floor(Math.random() * lastNames.length)]);",
+                    "",
+                    "// Генерация email",
+                    "const domains = ['gmail.com', 'yandex.ru', 'mail.ru', 'example.com'];",
+                    "const username = 'user' + Math.floor(Math.random() * 10000);",
+                    "const domain = domains[Math.floor(Math.random() * domains.length)];",
+                    "pm.globals.set('random_email', username + '@' + domain);"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        {
+            "key": "jwt_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "user_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "test_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "test_result_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "consultation_id",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "🔐 Authentication",
+            "item": [
+                {
+                    "name": "Telegram Auth",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set('jwt_token', response.access_token);",
+                                    "    pm.collectionVariables.set('user_id', response.user.id);",
+                                    "    console.log('JWT Token сохранен:', response.access_token);",
+                                    "} else {",
+                                    "    console.log('Ошибка аутентификации:', pm.response.text());",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": {{telegram_id}},\n  \"first_name\": \"{{random_first_name}}\",\n  \"last_name\": \"{{random_last_name}}\",\n  \"username\": \"test_user_{{random_string}}\",\n  \"auth_date\": {{$timestamp}},\n  \"hash\": \"test_hash_{{random_string}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/telegram",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "telegram"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/auth/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "profile"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"telegramId\": \"{{telegram_id}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "👥 Users",
+            "item": [
+                {
+                    "name": "Get All Users",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/users",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/users/{{user_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "{{user_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update User",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"firstName\": \"{{random_first_name}}\",\n  \"lastName\": \"{{random_last_name}}\",\n  \"language\": \"ru\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/{{user_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "{{user_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Language",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"language\": \"en\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/{{user_id}}/language",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "{{user_id}}",
+                                "language"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Dementia Risk",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"dementiaRiskLevel\": \"low\",\n  \"dementiaQuestionnaire\": {\n    \"score\": {{random_number}},\n    \"answers\": {\n      \"memory\": \"good\",\n      \"concentration\": \"excellent\",\n      \"sleep\": \"normal\"\n    }\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/{{user_id}}/dementia-risk",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "{{user_id}}",
+                                "dementia-risk"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "🧠 Tests",
+            "item": [
+                {
+                    "name": "Get Available Test Types",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.testTypes && response.testTypes.length > 0) {",
+                                    "        const randomTest = response.testTypes[Math.floor(Math.random() * response.testTypes.length)];",
+                                    "        pm.collectionVariables.set('test_type', randomTest.type);",
+                                    "        console.log('Выбран тест:', randomTest.type);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/tests/available",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tests",
+                                "available"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Tests",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.length > 0) {",
+                                    "        const randomTest = response[Math.floor(Math.random() * response.length)];",
+                                    "        pm.collectionVariables.set('test_id', randomTest.id);",
+                                    "        pm.collectionVariables.set('test_type', randomTest.type);",
+                                    "        console.log('Сохранен test_id:', randomTest.id);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/tests",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tests"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Test Instructions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/tests/type/VISUAL_MEMORY/instructions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tests",
+                                "type",
+                                "VISUAL_MEMORY",
+                                "instructions"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Generate Test Questions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/tests/type/VISUAL_MEMORY/questions?randomized=true",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tests",
+                                "type",
+                                "VISUAL_MEMORY",
+                                "questions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "randomized",
+                                    "value": "true"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Start Test",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set('test_result_id', response.id);",
+                                    "    console.log('Тест начат, result_id:', response.id);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"testId\": \"{{test_id}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tests/start",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tests",
+                                "start"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Submit Test Result",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"resultId\": \"{{test_result_id}}\",\n  \"answers\": {\n    \"question_1\": \"answer_1\",\n    \"question_2\": \"answer_2\",\n    \"question_3\": \"answer_3\",\n    \"correct\": {{random_number}},\n    \"total\": 10\n  },\n  \"emotionalState\": {\n    \"mood\": \"good\",\n    \"energy\": \"high\",\n    \"stress\": \"low\",\n    \"focus\": \"excellent\",\n    \"motivation\": \"high\"\n  },\n  \"timeSpent\": 180,\n  \"maxScore\": 100\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tests/submit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tests",
+                                "submit"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📊 History",
+            "item": [
+                {
+                    "name": "Get User History",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/history?limit=10&offset=0",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "history"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "offset",
+                                    "value": "0"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/history/stats?period=month",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "history",
+                                "stats"
+                            ],
+                            "query": [
+                                {
+                                    "key": "period",
+                                    "value": "month"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Test Type History",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/history/test-type/VISUAL_MEMORY",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "history",
+                                "test-type",
+                                "VISUAL_MEMORY"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Progress Trend",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/history/progress/VISUAL_MEMORY",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "history",
+                                "progress",
+                                "VISUAL_MEMORY"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Comparison with Average",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/history/comparison/VISUAL_MEMORY",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "history",
+                                "comparison",
+                                "VISUAL_MEMORY"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📅 Consultations",
+            "item": [
+                {
+                    "name": "Get Available Slots",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/consultations/slots/available",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "consultations",
+                                "slots",
+                                "available"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Consultation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set('consultation_id', response.id);",
+                                    "    console.log('Консультация создана, id:', response.id);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"type\": \"online\",\n  \"scheduledAt\": \"{{$isoTimestamp}}\",\n  \"notes\": \"Обсуждение результатов тестирования\",\n  \"location\": \"Онлайн консультация\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/consultations",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "consultations"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get My Consultations",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/consultations/my",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "consultations",
+                                "my"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Consultation",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"confirmed\",\n  \"meetingLink\": \"https://meet.google.com/{{random_string}}\",\n  \"notes\": \"Консультация подтверждена\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/consultations/{{consultation_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "consultations",
+                                "{{consultation_id}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "💪 Practices",
+            "item": [
+                {
+                    "name": "Get All Practices",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/practices",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "practices"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Practice Recommendations",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/practices/recommendations",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "practices",
+                                "recommendations"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Complete Exercise",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"score\": {{random_number}},\n  \"timeSpent\": 120,\n  \"answers\": {\n    \"exercise_1\": \"completed\",\n    \"difficulty\": \"medium\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/practices/practice-1/exercises/exercise-1/complete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "practices",
+                                "practice-1",
+                                "exercises",
+                                "exercise-1",
+                                "complete"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "😊 Emotional State",
+            "item": [
+                {
+                    "name": "Get Questions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/emotional-state/questions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "emotional-state",
+                                "questions"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Analyze Emotional State",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"mood\": \"good\",\n  \"energy\": \"high\",\n  \"stress\": \"low\",\n  \"focus\": \"excellent\",\n  \"motivation\": \"high\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/emotional-state/analyze",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "emotional-state",
+                                "analyze"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "❤️ Health & Monitoring",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Health Metrics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health/metrics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health",
+                                "metrics"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Readiness Probe",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health/ready",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health",
+                                "ready"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Liveness Probe",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health/live",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health",
+                                "live"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

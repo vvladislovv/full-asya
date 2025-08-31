@@ -1,0 +1,30 @@
+# Dockerfile для разработки
+FROM node:18-bullseye-slim
+
+WORKDIR /app
+
+# Установка необходимых утилит
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+     ca-certificates \
+     curl \
+     openssl \
+     postgresql-client \
+  && rm -rf /var/lib/apt/lists/*
+
+# Копирование package.json
+COPY package*.json ./
+
+# Установка зависимостей
+RUN npm install
+
+# Копирование исходного кода
+COPY . .
+
+# Генерация Prisma Client
+RUN npx prisma generate
+
+EXPOSE 3000
+
+# Команда для разработки (будет переопределена в docker-compose)
+CMD ["npm", "run", "start:dev"]

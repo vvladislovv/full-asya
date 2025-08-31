@@ -1,0 +1,1 @@
+export type DementiaRiskLevels = "low" | "medium" | "high"
