@@ -1,5 +1,6 @@
 "use client";
 import { startTest, submitTestResult } from "@/app/api/services/testService";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import React, { useCallback, useEffect, useState } from "react";
 import { MemoryGameProps } from "../../GameRenderer";
 import { TimerComponent } from "../../visual-memory/game/components/TimerComponent";
@@ -14,6 +15,7 @@ const seededRandom = (seed: number) => {
 };
 
 const DigitsVolumeGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurrentTestIndex, test, onNextTest, onBackToList}: MemoryGameProps) => {
+    const { t } = useLanguage();
     // Набор чисел для игры. Можно добавлять или изменять.
     const [randomNumbers, setRandomNumbers] = useState<number[]>([]);
     const [testResultId, setTestResultId] = useState<string | null>(null);
@@ -55,7 +57,31 @@ const DigitsVolumeGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurre
     // Функция отправки результатов
     const handleSubmitResults = useCallback(async (answers: Record<string, any>, correctAnswers: number, totalAnswers: number) => {
         if (!testResultId) {
-            console.error('Test result ID not found');
+            console.error('Test result ID not found - test may not be initialized properly');
+            // Попробуем инициализировать тест снова
+            if (test?.id) {
+                try {
+                    const result = await startTest(test.id);
+                    setTestResultId(result.id);
+                    setStartTime(Date.now());
+                    // Попробуем отправить результаты с новым ID
+                    const timeSpent = Math.floor((Date.now() - (startTime || Date.now())) / 1000);
+                    await submitTestResult({
+                        resultId: result.id,
+                        answers: {
+                            correct: correctAnswers,
+                            total: totalAnswers,
+                            details: answers
+                        },
+                        timeSpent,
+                        maxScore: totalAnswers
+                    });
+                    console.log('Результат теста отправлен успешно после переинициализации');
+                    return;
+                } catch (error) {
+                    console.error('Ошибка переинициализации теста:', error);
+                }
+            }
             return;
         }
 
@@ -76,7 +102,7 @@ const DigitsVolumeGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurre
         } catch (error) {
             console.error('Ошибка отправки результата теста:', error);
         }
-    }, [testResultId, startTime]);
+    }, [testResultId, startTime, test?.id]);
 
     // Функция перезапуска
     const restart = () => {
@@ -89,7 +115,7 @@ const DigitsVolumeGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurre
         <div className="relative w-screen h-screen bg-white">
             <div className="absolute top-0 left-0 right-0 z-10 pt-12 pb-4 bg-white">
                 <div className="text-[20px] text-center font-[600] text-[#1E1E1E]">
-                    {!ended && "Объем цифр"}
+                    {!ended && t('test_types.DIGIT_SPAN')}
                 </div>
             </div>
             <div className="pt-20 px-4 pb-4 h-full bg-white">

@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -9,6 +10,7 @@ import { Consultation, ConsultationCreateDto } from "../dto/consultation";
 import { formatDateTimeSafe } from "../utils/dateUtils";
 
 const ConsultationPage: React.FC = () => {
+	const { t } = useLanguage();
 	const [consultations, setConsultations] = useState<Consultation[]>([]);
 	const [form, setForm] = useState<ConsultationCreateDto>({
 		type: "offline",
@@ -27,7 +29,7 @@ const ConsultationPage: React.FC = () => {
 			const res = await getMyConsultation();
 			setConsultations(Array.isArray(res) ? res : Object.values(res));
 		} catch (err) {
-			setError("Ошибка загрузки консультаций");
+			setError(t('errors.consultation_load_error'));
 			console.error("Ошибка загрузки консультаций:", err);
 		}
 	}, []);
@@ -65,11 +67,11 @@ const ConsultationPage: React.FC = () => {
 		
 		// Валидация формы
 		if (!form.type || (form.type !== "online" && form.type !== "offline")) {
-			setError("Выберите тип консультации: онлайн или оффлайн");
+			setError(t('errors.select_consultation_type'));
 			return;
 		}
 		if (!form.scheduledAt) {
-			setError("Выберите дату и время консультации");
+			setError(t('errors.select_date_time'));
 			return;
 		}
 
@@ -82,7 +84,7 @@ const ConsultationPage: React.FC = () => {
 			setForm({ type: "offline", scheduledAt: "", notes: "", location: "" });
 		} catch (err: unknown) {
 			// Безопасная обработка ошибок
-			let errorMessage = "Ошибка создания консультации";
+			let errorMessage = t('errors.consultation_create_error');
 			
 			if (err && typeof err === "object") {
 				if (err instanceof Error && err.message) {
@@ -140,7 +142,7 @@ const ConsultationPage: React.FC = () => {
 						className="hover:cursor-pointer active:scale-[0.95] transition-all duration-300 w-[48px] h-[48px] rounded-full bg-[white] flex justify-center items-center"
 						style={{zIndex: 1}}
 					>
-						<Image src="/icons/back.svg" alt="Назад" width={10} height={14} style={{ width: 'auto', height: 'auto' }} />
+						<Image src="/icons/back.svg" alt={t('common.back')} width={10} height={14} style={{ width: 'auto', height: 'auto' }} />
 					</Link>
 					<div
 						className="pointer-events-none absolute left-0 right-0 text-[20px] text-center font-[600]"
@@ -295,7 +297,7 @@ const ConsultationPage: React.FC = () => {
 								id="location" 
 								value={form.location} 
 								onChange={handleChange} 
-								placeholder="Введите место проведения консультации" 
+								placeholder={t('consultations.location_placeholder')} 
 								className="border border-gray-300 rounded-lg px-3 py-2 text-[14px] focus:outline-none focus:ring-2 focus:ring-[#8DC63F] focus:border-transparent"
 							/>
 						</div>
@@ -309,7 +311,7 @@ const ConsultationPage: React.FC = () => {
 								id="notes" 
 								value={form.notes} 
 								onChange={handleChange} 
-								placeholder="Дополнительная информация о консультации" 
+								placeholder={t('consultations.notes_placeholder')} 
 								rows={3}
 								className="border border-gray-300 rounded-lg px-3 py-2 text-[14px] focus:outline-none focus:ring-2 focus:ring-[#8DC63F] focus:border-transparent resize-none"
 							/>

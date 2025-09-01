@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import { useEffect, useState } from "react";
 import styles from './CardAnimations.module.css';
 interface GameComponentProps {
@@ -7,6 +8,7 @@ interface GameComponentProps {
 }
 
 export const DigitsGameComponent: React.FC<GameComponentProps> = ({ randomNumbers, setGameEnded }) => {
+    const { t } = useLanguage();
     const [timer, setTimer] = useState(3000); // 3 секунды на запоминание
     const [currentNumberIndex, setCurrentNumberIndex] = useState(0);
     const [cardAnimation, setCardAnimation] = useState('animateIn');
@@ -55,7 +57,7 @@ export const DigitsGameComponent: React.FC<GameComponentProps> = ({ randomNumber
                 )}
             </div>
             <div className="text-[20px] leading-[16px] text-[#1E1E1E] font-[500] text-center">
-                Осталось: {Math.ceil(timer / 1000)} секунд
+                {t('game.time_left')}: {Math.ceil(timer / 1000)} {t('game.seconds')}
             </div>
         </div>
     );

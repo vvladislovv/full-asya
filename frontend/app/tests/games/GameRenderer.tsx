@@ -1,4 +1,5 @@
 import { Test } from "@/app/dto/test";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import Image from "next/image";
 import { CountOperationsGame } from "./count-operations/game/CountOperationsGame";
 import DigitsVolumeGame from "./digits-volume/game/DigitsVolumeGame";
@@ -27,6 +28,7 @@ interface GameRendererProps {
     onBackToList?: () => void;
 }
 export const GameRenderer : React.FC<GameRendererProps> = ({type, test, toggleShowGame, setCurrentTestIndex, currentTestIndex, onNextTest, onBackToList} : GameRendererProps) => {
+    const { t } = useLanguage();
     function renderGame() {
         switch (type) {
             case "VISUAL_MEMORY":
@@ -34,15 +36,15 @@ export const GameRenderer : React.FC<GameRendererProps> = ({type, test, toggleSh
             case "VERBAL_MEMORY":
                 return <VerbalMemoryGame test={test} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "AUDITORY_MEMORY":
-                return <SpeechMemoryGame setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
+                return <SpeechMemoryGame test={test} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "DIGIT_SPAN":
                 return <DigitsVolumeGame test={test} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "VISUAL_ATTENTION":
-                return <EyeMemoryGame setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
+                return <EyeMemoryGame test={test} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "STROOP_TEST":
-                return <StroopTestGame setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
+                return <StroopTestGame test={test} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "ARITHMETIC":
-                return <CountOperationsGame setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
+                return <CountOperationsGame test={test} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             case "SYMBOL_MEMORY":
                 return <SymbolMemoryGame test={test} setCurrentTestIndex={setCurrentTestIndex} currentTestIndex={currentTestIndex} onNextTest={onNextTest} onBackToList={onBackToList}/>
             default:
@@ -56,7 +58,7 @@ export const GameRenderer : React.FC<GameRendererProps> = ({type, test, toggleSh
                 className="fixed top-4 left-4 hover:cursor-pointer active:scale-[0.95] transition-all duration-300 w-[48px] h-[48px] rounded-full bg-[white] flex justify-center items-center"
                 style={{zIndex: 1}}
             >
-                <Image src="/icons/back.svg"  alt="Назад" width={10} height={14} style={{ width: 'auto', height: 'auto' }} />
+                <Image src="/icons/back.svg"  alt={t('common.back')} width={10} height={14} style={{ width: 'auto', height: 'auto' }} />
             </button>
             {renderGame()}
         </div>

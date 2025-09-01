@@ -19,32 +19,32 @@ export class I18nService {
     try {
       const localesDir = path.join(__dirname, 'locales');
       
-      // Загружаем русские переводы
+      // Load Russian translations
       const ruPath = path.join(localesDir, 'ru.json');
       if (fs.existsSync(ruPath)) {
         const ruTranslations = JSON.parse(fs.readFileSync(ruPath, 'utf8'));
         this.translations[Language.ru] = ruTranslations;
-        this.logger.log('✅ Загружены русские переводы');
+        this.logger.log('✅ Russian translations loaded');
       } else {
-        this.logger.warn('⚠️ Файл ru.json не найден, используем fallback переводы');
+        this.logger.warn('⚠️ ru.json file not found, using fallback translations');
         this.translations[Language.ru] = this.getFallbackTranslations('ru');
       }
 
-      // Загружаем английские переводы
+      // Load English translations
       const enPath = path.join(localesDir, 'en.json');
       if (fs.existsSync(enPath)) {
         const enTranslations = JSON.parse(fs.readFileSync(enPath, 'utf8'));
         this.translations[Language.en] = enTranslations;
-        this.logger.log('✅ Загружены английские переводы');
+        this.logger.log('✅ English translations loaded');
       } else {
-        this.logger.warn('⚠️ Файл en.json не найден, используем fallback переводы');
+        this.logger.warn('⚠️ en.json file not found, using fallback translations');
         this.translations[Language.en] = this.getFallbackTranslations('en');
       }
 
-      this.logger.log(`🌍 Инициализация i18n завершена. Доступные языки: ${Object.keys(this.translations).join(', ')}`);
+      this.logger.log(`🌍 I18n initialization completed. Available languages: ${Object.keys(this.translations).join(', ')}`);
     } catch (error) {
-      this.logger.error('❌ Ошибка загрузки переводов:', error);
-      // Используем fallback переводы
+      this.logger.error('❌ Error loading translations:', error);
+      // Use fallback translations
       this.translations = {
         [Language.ru]: this.getFallbackTranslations('ru'),
         [Language.en]: this.getFallbackTranslations('en')
@@ -178,7 +178,7 @@ export class I18nService {
     current[keys[keys.length - 1]] = value;
   }
 
-  // Специфические методы для различных модулей
+  // Specific methods for different modules
 
   getDementiaRecommendations(riskLevel: string, language: Language): string {
     return this.translate(`dementia.recommendations.${riskLevel}`, language);

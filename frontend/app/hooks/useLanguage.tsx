@@ -1,6 +1,6 @@
 "use client";
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { getTelegramLanguage, isTelegramWebApp } from '../api/services/telegramService';
+import { updateUserLanguage } from '../api/services/authService';
 import { useAuth } from '../providers/useAuth';
 
 type Language = 'ru' | 'en';
@@ -20,7 +20,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [language, setLanguageState] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>('ru');
   const [isLoading, setIsLoading] = useState(false);
   const [translations, setTranslations] = useState<Translations>({});
 
@@ -50,32 +50,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     loadTranslations();
   }, []);
 
-  // Автоматическое определение языка через Telegram API
+  // Автоматическое определение языка из базы данных пользователя
   useEffect(() => {
-    // Сначала проверяем Telegram API
-    if (isTelegramWebApp()) {
-      const telegramLang = getTelegramLanguage();
-      const language: Language = telegramLang === 'ru' ? 'ru' : 'en';
-      setLanguageState(language);
-      console.log(`🌍 Язык установлен из Telegram API: ${telegramLang} -> ${language}`);
+    // Используем язык из профиля пользователя, если он есть
+    if (user?.language) {
+      setLanguageState(user.language as Language);
+      console.log(`🌍 Язык установлен из БД: ${user.language}`);
       return;
     }
     
-    // Резервный вариант: язык из профиля пользователя
-    if (user?.language) {
-      const userLanguage = user.language as Language;
-      if (userLanguage === 'ru' || userLanguage === 'en') {
-        setLanguageState(userLanguage);
-        console.log(`🌍 Язык установлен из профиля пользователя: ${userLanguage}`);
-        return;
-      }
-    }
-    
-    // Последний резервный вариант: английский по умолчанию
-    const browserLanguage = navigator.language?.split('-')[0];
-    const language: Language = browserLanguage === 'ru' ? 'ru' : 'en';
-    setLanguageState('en'); // Устанавливаем английский по умолчанию
-    console.log(`🌍 Язык установлен по умолчанию: en (браузер: ${browserLanguage})`);
+    // Если пользователь не авторизован или язык не установлен, используем русский по умолчанию
+    setLanguageState('ru'); 
+    console.log(`🌍 Язык установлен по умолчанию: ru`);
   }, [user]);
 
   const setLanguage = async (newLanguage: Language) => {
@@ -85,8 +71,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     try {
       setLanguageState(newLanguage);
       
-      // TODO: Сохранить язык на сервере
-      // await updateUserLanguage(user.id, newLanguage);
+      // Сохраняем язык на сервере, если пользователь авторизован
+      if (user?.id) {
+        await updateUserLanguage(user.id, newLanguage);
+        console.log(`🌍 Язык сохранен в БД: ${newLanguage}`);
+      }
       
       console.log(`🌍 Язык изменен на: ${newLanguage}`);
     } catch (error) {

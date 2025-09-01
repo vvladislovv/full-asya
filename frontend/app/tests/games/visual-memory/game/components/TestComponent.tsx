@@ -170,7 +170,7 @@ export const TestComponent : React.FC<TestComponentProps> = ({initialTimer, rand
                 {allImages[currentIndex] && (
                     <Image 
                         src={allImages[currentIndex]} 
-                        alt="Картинка" 
+                        alt={t('game.image_alt')} 
                         width={200} 
                         height={200} 
                         style={{objectFit: 'contain', width: "auto", height: "auto"}}

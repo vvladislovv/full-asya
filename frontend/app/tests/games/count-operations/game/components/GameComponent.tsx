@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import React, { useEffect, useState } from "react";
 import type { Operation } from "../CountOperationsGame";
 import styles from './CardAnimations.module.css';
@@ -10,6 +11,7 @@ interface GameComponentProps {
 }
 
 export const CountOperationsGameComponent: React.FC<GameComponentProps> = ({ randomCountOperations, setResult, result, setGameEnded }) => {
+    const { t } = useLanguage();
     const initialTimer = 7000
     const [timer, setTimer] = useState(initialTimer); // 7 секунды на ответ
     const [currentCountOperationIndex, setCurrentCountOperationIndex] = useState(0);
@@ -47,7 +49,7 @@ export const CountOperationsGameComponent: React.FC<GameComponentProps> = ({ ran
 
         // Если правильно увеличиваем результат в родительском компоненте
         if (correct) {
-            setResult(result+1);
+            setResult(prev => prev + 1);
         }
         
         // Показываем на 1.5 секунды результаты и србасываем через 0.3 секунды (синхронизация с анимацией cardAnimatino duration 300)
@@ -58,10 +60,10 @@ export const CountOperationsGameComponent: React.FC<GameComponentProps> = ({ ran
                 setIsCorrect(false);
                 setCardAnimation('animateIn');
                 setAnswer("");
-                setCurrentCountOperationIndex(currentCountOperationIndex+1);
+                setCurrentCountOperationIndex(prev => prev + 1);
             }, 300)
         }, 1500)
-    }, [isAnswered, randomCountOperations, currentCountOperationIndex, result, setResult]);
+    }, [isAnswered, randomCountOperations, currentCountOperationIndex, setResult]);
 
     useEffect(() => {
         if (isAnswered) return;
@@ -86,7 +88,7 @@ export const CountOperationsGameComponent: React.FC<GameComponentProps> = ({ ran
     }, [currentCountOperationIndex, randomCountOperations.length, setGameEnded])
     return (
         <div className="flex flex-col items-center gap-6 justify-center h-full px-4">
-            <div className="text-[20px] font-[600] leading-[24px] text-[#1E1E1E] text-center">Решите арифметические примеры</div>
+            <div className="text-[20px] font-[600] leading-[24px] text-[#1E1E1E] text-center">{t('test_instructions.ARITHMETIC')}</div>
             <h1>{result}</h1>
             <div
                 onClick={() => handleAnswer(answer)}
@@ -120,7 +122,7 @@ export const CountOperationsGameComponent: React.FC<GameComponentProps> = ({ ran
                 )}
             </div>
             <div className="text-[20px] leading-[16px] text-[#1E1E1E] font-[500] text-center">
-                Осталось: {Math.ceil(timer / 1000)} секунд
+                {t('game.time_left')}: {Math.ceil(timer / 1000)} {t('game.seconds')}
             </div>
         </div>
     );

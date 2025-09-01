@@ -47,10 +47,10 @@ export const CountOperationsResultComponent : React.FC<StroopTestResultComponent
                     </div>
                     <p className="font-[400] text-[14px] leading-[18px] mt-8 text-center text-gray-600 px-6 max-w-sm">
                         {result/12 > 0.75 
-                            ? 'Отличный результат! Ваши навыки устного счёта и рабочая память работают очень хорошо.'
+                            ? t('game.count_good')
                             : result/12 > 0.5 
-                            ? 'Хороший результат! Есть возможности для развития математических навыков.'
-                            : 'Результат можно улучшить. Регулярная практика устного счёта поможет развить эти навыки.'
+                            ? t('game.count_medium')
+                            : t('game.count_bad')
                         }
                     </p>
                 </div>
@@ -58,7 +58,7 @@ export const CountOperationsResultComponent : React.FC<StroopTestResultComponent
             <div className="w-full absolute left-0 bottom-0 p-4 flex flex-col gap-2">
                 {onBackToList && (
                     <button onClick={onBackToList} className="cursor-pointer py-[18px] border border-gray-300 rounded-[43px] flex justify-center transition-all duration-300 active:scale-[0.97] bg-gray-50">
-                        <span className="text-[16px] font-[500] text-gray-600">Вернуться к списку тестов</span>
+                        <span className="text-[16px] font-[500] text-gray-600">{t('game.back_to_list')}</span>
                     </button>
                 )}
             </div>

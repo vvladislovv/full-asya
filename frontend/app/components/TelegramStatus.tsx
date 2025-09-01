@@ -1,6 +1,6 @@
 "use client";
 import { isTelegramWebApp } from "../api/services/telegramService";
-import { useLanguage } from "../hooks/useLanguage";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import { useAuth } from "../providers/useAuth";
 
 interface TelegramStatusProps {

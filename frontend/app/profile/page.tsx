@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useLanguage } from "../hooks/useLanguage";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import { useAuth } from "../providers/useAuth";
 
 const Profile : React.FC = () => {
@@ -16,7 +16,7 @@ const Profile : React.FC = () => {
                     className="hover:cursor-pointer active:scale-[0.95] transition-all duration-300 w-[48px] h-[48px] rounded-full bg-[white] flex justify-center items-center"
                     style={{zIndex: 1}}
                 >
-                    					<Image src="/icons/back.svg"  alt="Назад" width={10} height={14} style={{ width: 'auto', height: 'auto' }} />
+                    					<Image src="/icons/back.svg"  alt={t('common.back')} width={10} height={14} style={{ width: 'auto', height: 'auto' }} />
                 </Link>
                 <div
                     className="pointer-events-none absolute left-0 right-0 text-[20px] text-center font-[600]"
@@ -33,7 +33,7 @@ const Profile : React.FC = () => {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-center gap-2">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     <span className="text-xs text-blue-700 font-medium">
-                        Telegram ID: {user.telegramId}
+                        {t('auth.telegram_id')}: {user.telegramId}
                     </span>
                 </div>
             )}

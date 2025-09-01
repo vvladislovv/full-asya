@@ -6,7 +6,7 @@ import { LoginPage } from "./auth/LoginPage";
 import ExtensionCleanup from "./components/ExtensionCleanup";
 
 import SafeHydration from "./components/SafeHydration";
-import { useLanguage } from "./hooks/useLanguage";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import { useAuth } from "./providers/useAuth";
 
 export default function Home() {
@@ -43,7 +43,7 @@ export default function Home() {
                   className="text-[#0E0F0F] text-[22px] leading-[22px] font-[600] flex-1"
                   suppressHydrationWarning
                 >
-                  {t('home.greeting')}, {user?.firstName || user?.username || t('common.user', 'Пользователь')}
+                  {t('home.greeting')}, {user?.firstName || user?.username || t('common.user')}
                 </h1>
               </div>
               <p 

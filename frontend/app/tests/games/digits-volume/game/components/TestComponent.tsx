@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import { useEffect, useState } from "react";
 
 interface TestComponentProps {
@@ -12,6 +13,7 @@ interface TestComponentProps {
 }
 
 export const DigitsTestComponent: React.FC<TestComponentProps> = ({ randomNumbers, restart, setCurrentTestIndex, currentTestIndex, onNextTest, onBackToList, onSubmitResults}) => {
+    const { t } = useLanguage();
     // Fisher-Yates shuffle
     function shuffle(array: number[]) {
         const arr = [...array];
@@ -92,7 +94,7 @@ export const DigitsTestComponent: React.FC<TestComponentProps> = ({ randomNumber
             <div>
                 <div className="flex flex-col mt-12 h-full">
                     <div className="flex flex-col items-center">
-                        <div className="text-[20px] leading-[24px] font-[600] text-[#1E1E1E] mb-8">Результат теста</div>
+                        <div className="text-[20px] leading-[24px] font-[600] text-[#1E1E1E] mb-8">{t('game.test_result')}</div>
                         <div className="relative bg-[#E0E4E9] w-[178px] h-[178px] rounded-full p-4">
                             <svg className="absolute top-0 left-0 z-20" xmlns="http://www.w3.org/2000/svg" version="1.1" width="178" height="178">
                                 <defs>
@@ -115,7 +117,7 @@ export const DigitsTestComponent: React.FC<TestComponentProps> = ({ randomNumber
                             </svg>
                             <div className="bg-[#F2F5F9] w-full rounded-full h-full flex items-center justify-center">
                                 <div className="flex flex-col gap-[4px] items-center">
-                                    <span className="font-[500] text-[16px] leading-[16px]">{result / shuffledNumbers.length > 0.75 ? 'Высокий уровень' : result / shuffledNumbers.length > 0.5 ? 'Средний уровень' : 'Низкий уровень'}</span>
+                                    <span className="font-[500] text-[16px] leading-[16px]">{result / shuffledNumbers.length > 0.75 ? t('game.high_level') : result / shuffledNumbers.length > 0.5 ? t('game.medium_level') : t('game.low_level')}</span>
                                     <div>
                                         <span className="font-[600] text-[20px] leading-[24px]">{result}/</span>
                                         <span className="font-[500] text-[18px] leading-[24px]">{shuffledNumbers.length}</span>
@@ -125,10 +127,10 @@ export const DigitsTestComponent: React.FC<TestComponentProps> = ({ randomNumber
                         </div>
                         <p className="font-[400] text-[14px] leading-[18px] mt-8 text-center text-gray-600 px-6 max-w-sm">
                             {result/shuffledNumbers.length > 0.75 
-                                ? 'Отличный результат! Ваша кратковременная память работает очень хорошо.'
+                                ? t('game.digit_good')
                                 : result/shuffledNumbers.length > 0.5 
-                                ? 'Хороший результат! Есть потенциал для дальнейшего развития памяти.'
-                                : 'Результат можно улучшить. Регулярные тренировки помогут развить память.'
+                                ? t('game.digit_medium')
+                                : t('game.digit_bad')
                             }
                         </p>
                     </div>
@@ -136,7 +138,7 @@ export const DigitsTestComponent: React.FC<TestComponentProps> = ({ randomNumber
                 <div className="w-full absolute left-0 bottom-0 p-4 flex flex-col gap-2">
                     {onBackToList && (
                         <button onClick={onBackToList} className="cursor-pointer py-[18px] border border-gray-300 rounded-[43px] flex justify-center transition-all duration-300 active:scale-[0.97] bg-gray-50">
-                            <span className="text-[16px] font-[500] text-gray-600">Вернуться к списку тестов</span>
+                            <span className="text-[16px] font-[500] text-gray-600">{t('game.back_to_list')}</span>
                         </button>
                     )}
                 </div>
@@ -146,7 +148,7 @@ export const DigitsTestComponent: React.FC<TestComponentProps> = ({ randomNumber
 
     return (
         <div className="flex flex-col items-center justify-center h-full gap-8">
-            <h1 className="font-[600] text-[18px] leading-[20px] text-center px-4 mb-2">Выберите цифры в том порядке, в котором они были показаны</h1>
+            <h1 className="font-[600] text-[18px] leading-[20px] text-center px-4 mb-2">{t('test_instructions.DIGIT_SPAN')}</h1>
             <div className="w-full grid grid-cols-3 gap-x-2 gap-y-2">
                 {shuffledNumbers.map((number, index) => {
                     const feedbackClass = feedback[index] === 'correct' ? 'border-[2px] border-[#8DC63F]' : feedback[index] === 'incorrect' ? 'border-[2px] border-[#D9452B]' : '';

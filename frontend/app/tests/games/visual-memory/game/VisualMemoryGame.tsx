@@ -52,7 +52,33 @@ const VisualMemoryGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, curre
     // Функция отправки результатов
     const handleSubmitResults = useCallback(async (answers: Record<string, any>, correctAnswers: number, totalAnswers: number) => {
         if (!testResultId) {
-            console.error('Test result ID not found');
+            console.error('Test result ID not found - test may not be initialized properly');
+            // Попробуем инициализировать тест снова
+            if (test?.id) {
+                try {
+                    const result = await startTest(test.id);
+                    setTestResultId(result.id);
+                    setStartTime(Date.now());
+                    // Попробуем отправить результаты с новым ID
+                    const timeSpent = Math.floor((Date.now() - (startTime || Date.now())) / 1000);
+                    await submitTestResult({
+                        resultId: result.id,
+                        answers: {
+                            correct: correctAnswers,
+                            total: totalAnswers,
+                            details: answers,
+                            percentage: Math.round((correctAnswers / totalAnswers) * 100)
+                        },
+                        timeSpent,
+                        maxScore: totalAnswers,
+                        emotionalState: { mood: 'neutral' }
+                    });
+                    console.log('Результат теста отправлен успешно после переинициализации');
+                    return;
+                } catch (error) {
+                    console.error('Ошибка переинициализации теста:', error);
+                }
+            }
             return;
         }
 
@@ -75,7 +101,7 @@ const VisualMemoryGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, curre
         } catch (error) {
             console.error('Ошибка отправки результата теста:', error);
         }
-    }, [testResultId, startTime]);
+    }, [testResultId, startTime, test?.id]);
 
     // Функция перезапуска
     const restart = () => {

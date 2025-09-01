@@ -1,10 +1,10 @@
 "use client";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import Image from "next/image"
+import Link from "next/link"
+import { useEffect, useState } from "react"
 
-import { useLanguage } from "../hooks/useLanguage";
-import { useAuth } from "../providers/useAuth";
+import { useLanguage } from "@/app/hooks/useLanguage"
+import { useAuth } from "../providers/useAuth"
 
 // Интерфейс для результата теста
 interface TestResult {
@@ -78,18 +78,19 @@ async function fetchTestHistory(): Promise<TestResult[]> {
 }
 
 // Названия тестов на русском
-const getTestName = (testType: string, testObj?: any): string => {
+const getTestName = (testType: string, testObj?: any, t?: any): string => {
     if (testObj?.name) return testObj.name;
+    if (!t) return testType;
     
     const names: Record<string, string> = {
-        'VISUAL_MEMORY': 'Визуальная память',
-        'VERBAL_MEMORY': 'Вербальная память', 
-        'AUDITORY_MEMORY': 'Рече-слуховая память',
-        'DIGIT_SPAN': 'Объём цифр',
-        'VISUAL_ATTENTION': 'Зрительное внимание',
-        'STROOP_TEST': 'Тест Струпа',
-        'ARITHMETIC': 'Счётные операции',
-        'SYMBOL_MEMORY': 'Символьная память'
+        'VISUAL_MEMORY': t('test_types.VISUAL_MEMORY'),
+        'VERBAL_MEMORY': t('test_types.VERBAL_MEMORY'), 
+        'AUDITORY_MEMORY': t('test_types.AUDITORY_MEMORY'),
+        'DIGIT_SPAN': t('test_types.DIGIT_SPAN'),
+        'VISUAL_ATTENTION': t('test_types.VISUAL_ATTENTION'),
+        'STROOP_TEST': t('test_types.STROOP_TEST'),
+        'ARITHMETIC': t('test_types.ARITHMETIC'),
+        'SYMBOL_MEMORY': t('test_types.SYMBOL_MEMORY')
     };
     return names[testType] || testType;
 };
@@ -106,7 +107,7 @@ const formatDate = (dateString: string): string => {
             minute: '2-digit'
         });
     } catch {
-        return 'Дата недоступна';
+        return 'Date unavailable';
     }
 };
 
@@ -186,7 +187,7 @@ const History: React.FC = () => {
                     className="hover:cursor-pointer active:scale-[0.95] transition-all duration-300 w-[48px] h-[48px] rounded-full bg-[white] flex justify-center items-center"
                     style={{zIndex: 1}}
                 >
-                    <Image src="/icons/back.svg" alt="Назад" width={10} height={14} style={{ width: 'auto', height: 'auto' }} />
+                    <Image src="/icons/back.svg" alt={t('common.back')} width={10} height={14} style={{ width: 'auto', height: 'auto' }} />
                 </Link>
                 <div
                     className="pointer-events-none absolute left-0 right-0 text-[20px] text-center font-[600]"
@@ -254,7 +255,7 @@ const History: React.FC = () => {
                                         </div>
                                         <div>
                                             <h3 className="font-[600] text-[14px] text-[#1E1E1E]">
-                                                {getTestName(item.testType, item.test)}
+                                                {getTestName(item.testType, item.test, t)}
                                             </h3>
                                             <p className="text-[12px] text-gray-700">
                                                 {formatDate(item.completedAt)}

@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import { login } from "../api/services/authService";
 import ExtensionCleanup from "../components/ExtensionCleanup";
 import { LoginDto } from "../dto/user";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 export const LoginPage = () => {
+    const { t } = useLanguage();
     const [telegramId, setTelegramId] = useState("");
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
@@ -55,7 +57,7 @@ export const LoginPage = () => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!telegramId.trim()) {
-            setError("Введите Telegram ID");
+            setError(t('auth.enter_telegram_id'));
             return;
         }
         setLoading(true);
@@ -70,7 +72,7 @@ export const LoginPage = () => {
                 }, 1000);
             })
             .catch((error) => {
-                setError(error.message || "Ошибка входа");
+                setError(error.message || t('auth.error'));
             })
             .finally(() => setLoading(false))
     }
@@ -86,9 +88,9 @@ export const LoginPage = () => {
                     <form onSubmit={(e) => handleSubmit(e)} className="flex flex-col items-center gap-6 w-full max-w-sm" suppressHydrationWarning>
                         <div className="text-center mb-4" suppressHydrationWarning>
                             <h1 className="text-[32px] font-[700] bg-gradient-to-r from-black to-lime-600 bg-clip-text text-transparent mb-2" suppressHydrationWarning>
-                                Добро пожаловать
+                                {t('auth.welcome')}
                             </h1>
-                            <p className="text-gray-500 text-sm" suppressHydrationWarning>Войдите в свой аккаунт</p>
+                            <p className="text-gray-500 text-sm" suppressHydrationWarning>{t('auth.login_prompt')}</p>
                         </div>
                         
                         <div className="w-full space-y-4" suppressHydrationWarning>
@@ -97,7 +99,7 @@ export const LoginPage = () => {
                                     value={telegramId}
                                     onChange={(e) => setTelegramId(e.target.value)}
                                     className="w-full focus:outline-none bg-white/70 backdrop-blur-sm border border-gray-200 focus:border-[var(--green)] focus:ring-1 focus:ring-green-200 px-5 py-4 rounded-[20px] transition-all duration-300 placeholder-gray-400 shadow-sm hover:shadow-md"
-                                    placeholder="Telegram ID"
+                                    placeholder={t('auth.telegram_id')}
                                     type="text"
                                     suppressHydrationWarning
                                 />
@@ -116,13 +118,13 @@ export const LoginPage = () => {
                                 {loading && (
                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" suppressHydrationWarning></div>
                                 )}
-                                {loading ? 'Вход...' : 'Войти в аккаунт'}
+                                {loading ? t('auth.logging_in') : t('auth.login')}
                             </span>
                         </button>
 
                         <div className="w-full space-y-4" suppressHydrationWarning>
                             <div className="text-center" suppressHydrationWarning>
-                                {success && <h3 className="text-[16px] font-[600] text-green-400" suppressHydrationWarning>Вы вошли в аккаунт</h3>}
+                                {success && <h3 className="text-[16px] font-[600] text-green-400" suppressHydrationWarning>{t('auth.success')}</h3>}
                                 {error && <h3 className="text-[24px] font-[600] text-red-400" suppressHydrationWarning>{error}</h3>}
                             </div>
                         </div>

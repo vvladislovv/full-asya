@@ -26,7 +26,7 @@ export const StroopTestGameComponent: React.FC<StroopTestGameComponentProps> = (
         setIsAnswered(true);
         setIsCorrect(correct);
         if (correct) {
-            setResult(result + 1);
+            setResult(prev => prev + 1);
         }
         setTimeout(() => {
             setCardAnimation('animateOut');
@@ -34,10 +34,10 @@ export const StroopTestGameComponent: React.FC<StroopTestGameComponentProps> = (
                 setIsAnswered(false);
                 setIsCorrect(false);
                 setCardAnimation('animateIn');
-                setCurrentIndex(currentIndex+1);
+                setCurrentIndex(prev => prev + 1);
             }, 300)
         }, 1500);
-    }, [isAnswered, currentIndex, initialColors, randomColors, result, setResult]);
+    }, [isAnswered, currentIndex, initialColors, randomColors, setResult]);
 
     useEffect(() => {
         if (currentIndex >= randomColors.length - 1) {
@@ -58,11 +58,11 @@ export const StroopTestGameComponent: React.FC<StroopTestGameComponentProps> = (
             });
         }, 20);
         return () => clearInterval(interval);
-    }, [isAnswered, initialTimer, handleAnswer]);
+    }, [currentIndex, isAnswered, initialTimer, handleAnswer]);
     return (
         <div className="flex flex-col items-center gap-8 justify-center h-full px-4">
             <div className="text-[18px] text-center font-[600] leading-[16px] text-[#1E1E1E]">
-                {t('game.stroop_instruction', 'Нажмите на экран, когда название цвета совпадает с цветом его букв')}
+                {t('game.stroop_instruction')}
             </div>
             <div className="w-full">
                 {currentIndex < randomColors.length-1 && <div 

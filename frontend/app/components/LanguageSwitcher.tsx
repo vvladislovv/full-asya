@@ -1,5 +1,5 @@
 "use client";
-import { useLanguage } from '../hooks/useLanguage';
+import { useLanguage } from '@/app/hooks/useLanguage';
 
 interface LanguageSwitcherProps {
   className?: string;

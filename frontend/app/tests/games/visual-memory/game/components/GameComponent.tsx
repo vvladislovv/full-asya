@@ -28,7 +28,7 @@ export const GameComponent : React.FC<GameComponentProps> = ({initialTimer, setG
                     <div key={index} className="relative bg-[#E5EADD] rounded-[8px] h-[110px] flex justify-center items-center">
                         <Image 
                             src={image} 
-                            alt="Картинка" 
+                            alt={t('game.image_alt')} 
                             width="86" 
                             height="86"
                             style={{ width: 'auto', height: 'auto' }}

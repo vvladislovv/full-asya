@@ -9,7 +9,8 @@
         "finish": "Finish",
         "save": "Save",
         "cancel": "Cancel",
-        "user": "User"
+        "user": "User",
+        "notFound": "Not Found"
     },
     "auth": {
         "welcome": "Welcome",
@@ -37,14 +38,42 @@
         "basic_plan": "Basic Plan",
         "expires": "Expires on",
         "personal_program": "personal development program",
-        "specialist_chat": "chat with specialist"
+        "specialist_chat": "chat with specialist",
+        "telegram_connected": "Telegram Connected",
+        "telegram_not_connected": "Telegram Not Connected",
+        "connect_telegram": "Connect Telegram",
+        "tests_completed": "Tests Completed",
+        "average_score": "Average Score",
+        "last_test": "Last Test",
+        "cognitive_diagnostics": "Cognitive Diagnostics",
+        "cognitive_description": "Take tests to assess memory",
+        "statistics": "Statistics",
+        "statistics_description": "Track your progress",
+        "settings": "Settings",
+        "settings_description": "Personalize the application",
+        "no_stats": "Statistics unavailable",
+        "language": "Language",
+        "risk_level": {
+            "low": "Low Risk",
+            "medium": "Medium Risk",
+            "high": "High Risk"
+        }
     },
     "history": {
         "title": "History",
         "no_data": "No data",
         "test_completed": "Test completed",
         "loading_history": "Loading history...",
-        "error_loading": "Error loading history"
+        "error_loading": "Error loading history",
+        "history_empty": "History is empty",
+        "history_empty_description": "Take your first test to see results",
+        "test_history": "Test History",
+        "score_from": "of",
+        "result_levels": {
+            "high": "High",
+            "medium": "Medium",
+            "low": "Low"
+        }
     },
     "tests": {
         "title": "Tests and Practices",
@@ -82,6 +111,16 @@
         "ARITHMETIC": "Test to assess the ability to perform mental mathematical calculations",
         "SYMBOL_MEMORY": "Test to assess the ability to remember correspondences between symbols and values"
     },
+    "test_instructions": {
+        "VISUAL_MEMORY": "You will be shown images. Remember them and select the correct answers.",
+        "VERBAL_MEMORY": "You will be presented with a list of words. Remember and reproduce them.",
+        "AUDITORY_MEMORY": "You will hear sequences of digits and words. Repeat them.",
+        "DIGIT_SPAN": "You will be shown sequences of digits. Repeat them in the correct order.",
+        "VISUAL_ATTENTION": "Find and mark target objects among distracting elements.",
+        "STROOP_TEST": "Name the color of the text, not what is written.",
+        "ARITHMETIC": "Solve mathematical problems mentally.",
+        "SYMBOL_MEMORY": "Remember the correspondence of symbols and numbers, then convert symbols to numbers."
+    },
     "results": {
         "high": "High",
         "medium": "Medium",
@@ -90,7 +129,10 @@
         "percentage": "Percentage",
         "time_spent": "Time spent",
         "correct_answers": "Correct answers",
-        "total_questions": "Total questions"
+        "total_questions": "Total questions",
+        "high_performance": "Excellent result! Your memory is working very well.",
+        "medium_performance": "Good result! There's potential for improvement.",
+        "low_performance": "The result can be improved. Try taking the test again."
     },
     "consultations": {
         "title": "Consultations",
@@ -101,6 +143,44 @@
         "confirmed": "Confirmed",
         "cancelled": "Cancelled",
         "completed": "Completed"
+    },
+    "settings": {
+        "title": "Settings",
+        "notifications": "Notifications",
+        "push_notifications": "Push Notifications",
+        "push_notifications_description": "Receive notifications about new tests",
+        "appearance": "Appearance",
+        "dark_mode": "Dark Mode",
+        "dark_mode_description": "Switch to dark theme",
+        "data": "Data",
+        "auto_save": "Auto-save",
+        "auto_save_description": "Automatically save progress",
+        "logout": "Logout",
+        "profile_info": "Profile Information"
+    },
+    "game": {
+        "memory_diagnostics": "Memory Diagnostics",
+        "test_result": "Test Result",
+        "card_number": "Card",
+        "of": "of",
+        "was_image_shown": "Was this image shown in the list?",
+        "correct": "Correct!",
+        "incorrect": "Incorrect!",
+        "auto_answer_no": "Auto answer \"No\" in",
+        "seconds": "seconds",
+        "try_again": "Try Again",
+        "next_test": "Go to Next Test",
+        "back_to_list": "Back to Test List",
+        "high_level": "High Level",
+        "medium_level": "Medium Level",
+        "low_level": "Low Level",
+        "get_ready": "Get Ready!",
+        "test_starts_in": "Test starts in",
+        "remember_images": "Remember the images",
+        "time_left": "Time left",
+        "yes": "Yes",
+        "no": "No",
+        "stroop_instruction": "Tap the screen when the color name matches the color of its letters"
     },
     "errors": {
         "not_found": "Not found",

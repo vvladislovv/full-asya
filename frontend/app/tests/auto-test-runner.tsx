@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { getTests, startTest, submitTestResult } from '../api/services/testService';
-import { useLanguage } from '../hooks/useLanguage';
+import { useLanguage } from '@/app/hooks/useLanguage';
 import { useAuth } from '../providers/useAuth';
 
 interface TestConfig {

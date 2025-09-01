@@ -1,3 +1,4 @@
+import { useLanguage } from "@/app/hooks/useLanguage";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import styles from './Equalizer.module.css';
@@ -8,6 +9,7 @@ interface GameComponentProps {
     setGameEnded: (state : boolean) => void;
 }
 export const SpeechGameComponent : React.FC<GameComponentProps> = ({initialTimer, setGameEnded, gameEnded, randomImageWithName}: GameComponentProps) => {
+    const { t } = useLanguage();
     const [timer, setTimer] = useState(initialTimer);
     const [voiced, setVoiced] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
@@ -52,7 +54,7 @@ export const SpeechGameComponent : React.FC<GameComponentProps> = ({initialTimer
                 style={{background: 'linear-gradient(222.88deg, #BEED7C 24.07%, #8DC63F 72.35%)'}}
             >
                 <div className="w-full h-full bg-[#F2F5F9] rounded-full flex justify-center items-center overflow-hidden">
-                    <Image src="/icons/music.svg" alt="Музыка" width="32" height="32" style={{ width: 'auto', height: 'auto' }} />
+                    <Image src="/icons/music.svg" alt={t('game.music')} width="32" height="32" style={{ width: 'auto', height: 'auto' }} />
                 </div>
             </div>
 
@@ -77,7 +79,7 @@ export const SpeechGameComponent : React.FC<GameComponentProps> = ({initialTimer
                 )}
             </div>
 
-            <div className="text-[20px] leading-[16px] text-[#1E1E1E] font-[500] text-center">Осталось: {Math.ceil(timer / 1000) - 1} секунд</div>
+            <div className="text-[20px] leading-[16px] text-[#1E1E1E] font-[500] text-center">{t('game.time_left')}: {Math.ceil(timer / 1000) - 1} {t('game.seconds')}</div>
         </div>
     )
 }

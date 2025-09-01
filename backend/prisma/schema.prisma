@@ -60,7 +60,7 @@ model User {
   username                String?
   firstName               String?
   lastName                String?
-  language                Language           @default(en)
+  language                Language           @default(ru)
   dementiaRiskLevel       DementiaRiskLevel?
   dementiaQuestionnaire   Json?
   hasCompletedDiagnostic  Boolean            @default(false)

@@ -111,7 +111,7 @@
         "SYMBOL_MEMORY": "Test to assess the ability to remember correspondences between symbols and values"
     },
     "test_instructions": {
-        "VISUAL_MEMORY": "You will be shown images. Remember them and select the correct answers.",
+        "VISUAL_MEMORY": "Remember the pictures",
         "VERBAL_MEMORY": "You will be presented with a list of words. Remember and reproduce them.",
         "AUDITORY_MEMORY": "You will hear sequences of digits and words. Repeat them.",
         "DIGIT_SPAN": "You will be shown sequences of digits. Repeat them in the correct order.",
@@ -145,6 +145,7 @@
     },
     "settings": {
         "title": "Settings",
+        "language_settings": "Language Settings",
         "notifications": "Notifications",
         "push_notifications": "Push Notifications",
         "push_notifications_description": "Receive notifications about new tests",
@@ -179,7 +180,47 @@
         "time_left": "Time left",
         "yes": "Yes",
         "no": "No",
-        "stroop_instruction": "Tap the screen when the color name matches the color of its letters"
+        "stroop_instruction": "Tap the screen when the color name matches the color of its letters",
+        "find_first_letter": "Find the first letter of the word",
+        "image_alt": "Image",
+        "authorization": "Authorization",
+        "tests_found": "Tests found",
+        "auto_test_all": "Auto test all 8 tests",
+        "minutes": "min",
+        "verbal_memory_good": "Excellent result! You correctly identified the first letter of the word, indicating well-developed verbal memory.",
+        "verbal_memory_bad": "Try again! Practice will help you better remember sounds and associate them with letters.",
+        "stroop_good": "Excellent result! Your ability to concentrate and suppress interference is very good.",
+        "stroop_medium": "Good result! There's potential for improving attention concentration.",
+        "stroop_bad": "The result can be improved. Attention training will help you better cope with distracting factors.",
+        "count_good": "Excellent result! Your mental arithmetic skills and working memory work very well.",
+        "count_medium": "Good result! There's potential for developing mental arithmetic skills.",
+        "count_bad": "The result can be improved. Regular practice will help develop quick calculation skills.",
+        "audio_good": "Excellent result! Your auditory memory and ability to recognize voiced objects work well.",
+        "audio_bad": "Try again! Developing auditory attention will help you better remember audio information.",
+        "visual_good": "Excellent result! Your visual memory retains information excellently.",
+        "visual_medium": "Good result! There are opportunities for developing visual memory.",
+        "visual_bad": "The result can be improved. Reading and visualization will help strengthen memory.",
+        "digit_good": "Excellent result! Your short-term memory works very well.",
+        "digit_medium": "Good result! There's potential for developing short-term memory.",
+        "digit_bad": "The result can be improved. Training will help increase memory capacity.",
+        "symbol_good": "Excellent result! Your visual memory and attention work very well.",
+        "symbol_medium": "Good result! There's potential for developing symbolic memory.",
+        "symbol_bad": "The result can be improved. Practice will help you better remember symbols.",
+        "music": "Music"
+    },
+    "colors": {
+        "красный": "red",
+        "оранжевый": "orange",
+        "желтый": "yellow",
+        "зеленый": "green",
+        "голубой": "cyan",
+        "синий": "blue",
+        "фиолетовый": "purple",
+        "черный": "black",
+        "белый": "white",
+        "серый": "gray",
+        "коричневый": "brown",
+        "розовый": "pink"
     },
     "errors": {
         "not_found": "Not found",
@@ -187,6 +228,14 @@
         "forbidden": "Access denied",
         "internal_error": "Internal server error",
         "validation_error": "Validation error",
-        "network_error": "Network error"
+        "network_error": "Network error",
+        "consultation_load_error": "Error loading consultations",
+        "select_consultation_type": "Select consultation type: online or offline",
+        "select_date_time": "Select consultation date and time",
+        "consultation_create_error": "Error creating consultation"
+    },
+    "consultations": {
+        "location_placeholder": "Enter consultation location",
+        "notes_placeholder": "Additional consultation information"
     }
 }

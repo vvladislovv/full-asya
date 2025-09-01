@@ -1,5 +1,6 @@
 "use client";
 import { startTest, submitTestResult } from "@/app/api/services/testService";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import React, { useCallback, useState } from "react";
 import { MemoryGameProps } from "../../GameRenderer";
 import { TimerComponent } from "../../visual-memory/game/components/TimerComponent";
@@ -7,6 +8,7 @@ import { VerbalGameComponent } from "./components/GameComponent";
 import { VerbalTestComponent } from "./components/TestComponent";
 import "./waves.css";
 const VerbalMemoryGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, currentTestIndex, onNextTest, onBackToList, test} : MemoryGameProps) => {
+    const { t } = useLanguage();
 
     const [started, setStarted] = useState(false)
     const [ended, setEnded] = useState(false);
@@ -95,7 +97,7 @@ const VerbalMemoryGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, curre
         <div className="relative w-screen h-screen bg-white">
             <div className="absolute top-0 left-0 right-0 z-10 pt-12 pb-4 bg-white">
                 <div className="text-[20px] text-center font-[600] text-[#1E1E1E]">
-                    {!ended && "Вербальная память"}
+                    {!ended && t('test_types.VERBAL_MEMORY')}
                 </div>
             </div>
             <div className="pt-20 px-4 pb-4 h-full bg-white">

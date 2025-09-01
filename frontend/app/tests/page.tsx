@@ -1,16 +1,16 @@
 "use client";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getTests } from "../api/services/testService";
-import { Test } from "../dto/test";
-import { useLanguage } from "../hooks/useLanguage";
-import { useAuth } from "../providers/useAuth";
-import ErrorScreen from "../ui/errorScreen";
-import Spinner from "../ui/spinner";
-import AutoTestRunner from "./auto-test-runner";
-import { GameRenderer, GameTypeEnum } from "./games/GameRenderer";
-import TestInformation from "./testInfo/info";
+import Image from "next/image"
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import { getTests } from "../api/services/testService"
+import { Test } from "../dto/test"
+import { useLanguage } from "@/app/hooks/useLanguage"
+import { useAuth } from "../providers/useAuth"
+import ErrorScreen from "../ui/errorScreen"
+import Spinner from "../ui/spinner"
+import AutoTestRunner from "./auto-test-runner"
+import { GameRenderer, GameTypeEnum } from "./games/GameRenderer"
+import TestInformation from "./testInfo/info"
 
 
 
@@ -18,14 +18,14 @@ const Tests: React.FC = () => {
     const { user, loading: authLoading } = useAuth();
     const { t } = useLanguage();
     
-    // Функция создания fallback тестов с переводами
+    // Function to create fallback tests with translations
     const createFallbackTests = (): Test[] => [
         {
             id: "550e8400-e29b-41d4-a716-446655440000",
             type: "VISUAL_MEMORY",
-            name: t("test_types.VISUAL_MEMORY", "Визуальная память"),
-            description: t("test_descriptions.VISUAL_MEMORY", "Тест для оценки способности запоминать и воспроизводить визуальную информацию"),
-            instruction: t("test_instructions.VISUAL_MEMORY", "Вам будут показаны изображения. Запомните их и выберите правильные ответы."),
+            name: t("test_types.VISUAL_MEMORY"),
+            description: t("test_descriptions.VISUAL_MEMORY"),
+            instruction: t("test_instructions.VISUAL_MEMORY"),
             difficulty: "medium",
             configuration: {
                 questionCount: 10,
@@ -38,9 +38,9 @@ const Tests: React.FC = () => {
         {
             id: "550e8400-e29b-41d4-a716-446655440001",
             type: "VERBAL_MEMORY",
-            name: t("test_types.VERBAL_MEMORY", "Вербальная память"),
-            description: t("test_descriptions.VERBAL_MEMORY", "Тест для оценки способности запоминать и воспроизводить словесную информацию"),
-            instruction: t("test_instructions.VERBAL_MEMORY", "Вам будет представлен список слов. Запомните их и воспроизведите."),
+            name: t("test_types.VERBAL_MEMORY"),
+            description: t("test_descriptions.VERBAL_MEMORY"),
+            instruction: t("test_instructions.VERBAL_MEMORY"),
             difficulty: "easy",
             configuration: {
                 questionCount: 8,
@@ -53,9 +53,9 @@ const Tests: React.FC = () => {
         {
             id: "550e8400-e29b-41d4-a716-446655440002",
             type: "AUDITORY_MEMORY",
-            name: t("test_types.AUDITORY_MEMORY", "Рече-слуховая память"),
-            description: t("test_descriptions.AUDITORY_MEMORY", "Тест для оценки способности запоминать и воспроизводить слуховую информацию"),
-            instruction: t("test_instructions.AUDITORY_MEMORY", "Вам будут озвучены последовательности цифр и слов. Повторите их."),
+            name: t("test_types.AUDITORY_MEMORY"),
+            description: t("test_descriptions.AUDITORY_MEMORY"),
+            instruction: t("test_instructions.AUDITORY_MEMORY"),
             difficulty: "medium",
             configuration: {
                 questionCount: 6,
@@ -68,9 +68,9 @@ const Tests: React.FC = () => {
         {
             id: "550e8400-e29b-41d4-a716-446655440003",
             type: "DIGIT_SPAN",
-            name: t("test_types.DIGIT_SPAN", "Объём цифр"),
-            description: t("test_descriptions.DIGIT_SPAN", "Тест для оценки объема кратковременной памяти для цифровой информации"),
-            instruction: t("test_instructions.DIGIT_SPAN", "Вам будут показаны последовательности цифр. Повторите их в правильном порядке."),
+            name: t("test_types.DIGIT_SPAN"),
+            description: t("test_descriptions.DIGIT_SPAN"),
+            instruction: t("test_instructions.DIGIT_SPAN"),
             difficulty: "hard",
             configuration: {
                 questionCount: 5,
@@ -83,9 +83,9 @@ const Tests: React.FC = () => {
         {
             id: "550e8400-e29b-41d4-a716-446655440004",
             type: "VISUAL_ATTENTION",
-            name: t("test_types.VISUAL_ATTENTION", "Зрительная память и внимание"),
-            description: t("test_descriptions.VISUAL_ATTENTION", "Тест для оценки способности концентрировать внимание на зрительных стимулах"),
-            instruction: t("test_instructions.VISUAL_ATTENTION", "Найдите и отметьте целевые объекты среди отвлекающих элементов."),
+            name: t("test_types.VISUAL_ATTENTION"),
+            description: t("test_descriptions.VISUAL_ATTENTION"),
+            instruction: t("test_instructions.VISUAL_ATTENTION"),
             difficulty: "medium",
             configuration: {
                 questionCount: 12,
@@ -98,9 +98,9 @@ const Tests: React.FC = () => {
         {
             id: "550e8400-e29b-41d4-a716-446655440005",
             type: "STROOP_TEST",
-            name: t("test_types.STROOP_TEST", "Тест Струпа"),
-            description: t("test_descriptions.STROOP_TEST", "Тест для оценки способности к когнитивному контролю и торможению автоматических реакций"),
-            instruction: t("test_instructions.STROOP_TEST", "Назовите цвет текста, а не то, что написано."),
+            name: t("test_types.STROOP_TEST"),
+            description: t("test_descriptions.STROOP_TEST"),
+            instruction: t("test_instructions.STROOP_TEST"),
             difficulty: "hard",
             configuration: {
                 questionCount: 20,
@@ -113,9 +113,9 @@ const Tests: React.FC = () => {
         {
             id: "550e8400-e29b-41d4-a716-446655440006",
             type: "ARITHMETIC",
-            name: t("test_types.ARITHMETIC", "Счётные операции"),
-            description: t("test_descriptions.ARITHMETIC", "Тест для оценки способности к математическим вычислениям в уме"),
-            instruction: t("test_instructions.ARITHMETIC", "Решите математические задачи в уме."),
+            name: t("test_types.ARITHMETIC"),
+            description: t("test_descriptions.ARITHMETIC"),
+            instruction: t("test_instructions.ARITHMETIC"),
             difficulty: "medium",
             configuration: {
                 questionCount: 15,
@@ -128,9 +128,9 @@ const Tests: React.FC = () => {
         {
             id: "550e8400-e29b-41d4-a716-446655440007",
             type: "SYMBOL_MEMORY",
-            name: t("test_types.SYMBOL_MEMORY", "Символьная память"),
-            description: t("test_descriptions.SYMBOL_MEMORY", "Тест для оценки способности запоминать соответствия между символами и значениями"),
-            instruction: t("test_instructions.SYMBOL_MEMORY", "Запомните соответствие символов и цифр, затем преобразуйте символы в цифры."),
+            name: t("test_types.SYMBOL_MEMORY"),
+            description: t("test_descriptions.SYMBOL_MEMORY"),
+            instruction: t("test_instructions.SYMBOL_MEMORY"),
             difficulty: "hard",
             configuration: {
                 questionCount: 8,
@@ -142,14 +142,14 @@ const Tests: React.FC = () => {
         }
     ];
     
-    // состояния, необходимые для первоначальной загрузки тестов с бэка
+    // States needed for initial loading of tests from backend
     const [tests, setTests] = useState<Test[]>([]);
     const [currentTest, setCurrentTest] = useState<Test | null>(null);
     const [currentTestIndex, setCurrentTestIndex] = useState(0);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
 
-    // состояния для навигации по тестам
+    // States for test navigation
     const [showTestInfo, setShowTestInfo] = useState(false);
     const [showGame, setShowGame] = useState(false);
     const [showAutoTest, setShowAutoTest] = useState(false);
@@ -158,42 +158,49 @@ const Tests: React.FC = () => {
         setShowGame(!showGame);
     };
 
-    // загрузка тестов при монтировании компонента
+    // Load tests when component mounts
     useEffect(() => {
-        if (authLoading) return; // Ждем завершения авторизации
+        if (authLoading) return; // Wait for authorization to complete
         
         getTests()
             .then((res: Test[]) => {
                 if (res && res.length > 0) {
                     console.log("✅ Получены тесты с API:", res.length, res);
-                    setTests(res);
+                    // Переводим названия и описания для тестов с API
+                    const translatedTests = res.map(test => ({
+                        ...test,
+                        name: t(`test_types.${test.type}`),
+                        description: t(`test_descriptions.${test.type}`),
+                        instruction: t(`test_instructions.${test.type}`)
+                    }));
+                    setTests(translatedTests);
                 } else {
-                    console.log("⚠️ API вернул пустой массив, тесты недоступны");
-                    setTests([]);
+                    console.log("⚠️ API вернул пустой массив, используем fallback тесты");
+                    setTests(createFallbackTests());
                 }
             })
             .catch((error) => {
-                console.log("❌ API недоступен:", error);
-                setTests([]);
+                console.log("❌ API недоступен, используем fallback тесты:", error);
+                setTests(createFallbackTests());
             })
             .finally(() => setLoading(false));
-    }, [authLoading, t]); // Добавлена зависимость от переводов
+    }, [authLoading, t]); // Added dependency on translations
 
-    // Отвечает за навигацию по тестам
+    // Handles test navigation
     useEffect(() => {
         if (currentTest) {
             setShowTestInfo(true);
         }
     }, [currentTest]);
 
-    // Обработка перехода к следующему тесту
+    // Handle transition to next test
     const handleNextTest = () => {
         const nextIndex = currentTestIndex + 1;
         if (nextIndex < tests.length) {
             setCurrentTestIndex(nextIndex);
             setCurrentTest(tests[nextIndex]);
         } else {
-            // Если это последний тест, возвращаемся к списку
+            // If this is the last test, return to list
             setShowTestInfo(false);
             setShowGame(false);
             setCurrentTest(null);
@@ -201,7 +208,7 @@ const Tests: React.FC = () => {
         }
     };
 
-    // Обработка возврата к списку тестов
+    // Handle return to test list
     const handleBackToList = () => {
         setShowTestInfo(false);
         setShowGame(false);
@@ -209,13 +216,13 @@ const Tests: React.FC = () => {
         setCurrentTestIndex(0);
     };
 
-    // Показываем загрузку авторизации
+    // Show authorization loading
     if (authLoading) {
         return (
             <div className="w-screen h-screen bg-white flex items-center justify-center">
                 <div className="text-center">
                     <Spinner />
-                    <p className="mt-4 text-gray-800">Авторизация...</p>
+                    <p className="mt-4 text-gray-800">{t('game.authorization')}...</p>
                 </div>
             </div>
         );
@@ -266,7 +273,7 @@ const Tests: React.FC = () => {
                     >
                         <Image
                             src="/icons/back.svg"
-                            alt="Назад"
+                            alt={t('common.back')}
                             width={8}
                             height={14}
                             style={{ width: "auto", height: "auto" }}
@@ -284,19 +291,13 @@ const Tests: React.FC = () => {
                 <div className="flex flex-col gap-3 flex-1">
                     <div className="text-center mb-2">
                         <p className="text-sm text-gray-800">
-                            {user ? `${t('home.greeting')}, ${user.firstName || user.username || t('common.user', 'Пользователь')}!` : t('common.loading')}
+                            {user ? `${t('home.greeting')}, ${user.firstName || user.username || t('common.user')}!` : t('common.loading')}
                         </p>
                         <p className="text-xs text-gray-700 mt-1">
-                            Найдено тестов: {tests.length}
+                            {t('game.tests_found')}: {tests.length}
                         </p>
                         
-                        {/* Кнопка автотестирования */}
-                        <button
-                            onClick={() => setShowAutoTest(true)}
-                            className="mt-3 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                        >
-                            🤖 Автотест всех 8 тестов
-                        </button>
+
                     </div>
                     
                     {tests.map((test, index) => (
@@ -325,14 +326,14 @@ const Tests: React.FC = () => {
                                             {t(`tests.difficulty.${test.difficulty}`)}
                                         </span>
                                         <span className="text-[10px] text-[#666] opacity-70">
-                                            {test.configuration?.timeLimit ? `${Math.floor(test.configuration.timeLimit / 60)} мин` : '5 мин'}
+                                            {test.configuration?.timeLimit ? `${Math.floor(test.configuration.timeLimit / 60)} ${t('game.minutes')}` : `5 ${t('game.minutes')}`}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="bg-[#8DC63F] rounded-full w-[32px] h-[32px] flex justify-center items-center">
                                     <Image
                                         src="/icons/next.svg"
-                                        alt="Вперед"
+                                        alt={t('common.next')}
                                         width={6}
                                         height={10}
                                         style={{ width: "auto", height: "auto" }}

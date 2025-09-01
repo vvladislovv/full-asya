@@ -45,17 +45,17 @@ export const StoopTestResultComponent : React.FC<StroopTestResultComponentProps>
                     </div>
                     <p className="font-[400] text-[14px] leading-[18px] mt-8 text-center text-gray-600 px-6 max-w-sm">
                         {result/12 > 0.75 
-                            ? 'Отличный результат! Ваша способность к концентрации и подавлению интерференции очень хороша.'
+                            ? t('game.stroop_good')
                             : result/12 > 0.5 
-                            ? 'Хороший результат! Есть потенциал для улучшения концентрации внимания.'
-                            : 'Результат можно улучшить. Тренировка внимания поможет лучше справляться с отвлекающими факторами.'
+                            ? t('game.stroop_medium')
+                            : t('game.stroop_bad')
                         }
                     </p>
                 </div>
             </div>
             <div className="w-full absolute left-0 bottom-0 p-4 flex flex-col gap-2">
                 <button onClick={() => window.history.back()} className="cursor-pointer py-[18px] border border-gray-300 rounded-[43px] flex justify-center transition-all duration-300 active:scale-[0.97] bg-gray-50">
-                    <span className="text-[16px] font-[500] text-gray-600">Вернуться к списку тестов</span>
+                    <span className="text-[16px] font-[500] text-gray-600">{t('game.back_to_list')}</span>
                 </button>
             </div>
         </div>
