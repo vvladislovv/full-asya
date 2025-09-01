@@ -233,12 +233,21 @@ def register_handlers():
             [InlineKeyboardButton(
                 text="👨‍⚕️ Консультация" if language == "ru" else "👨‍⚕️ Consultation",
                 callback_data="consultation"
-            )],
-            [InlineKeyboardButton(
-                text="🔄 Пройти заново" if language == "ru" else "🔄 Restart",
-                callback_data="restart"
             )]
         ]
+        
+        # Добавляем кнопку для перехода в приложение (если URL настроен)
+        if settings.MAIN_PAGE_URL:
+            keyboard.append([InlineKeyboardButton(
+                text="📱 Открыть приложение" if language == "ru" else "📱 Open App",
+                url=settings.MAIN_PAGE_URL
+            )])
+        
+        # Кнопка перезапуска
+        keyboard.append([InlineKeyboardButton(
+            text="🔄 Пройти заново" if language == "ru" else "🔄 Restart",
+            callback_data="restart"
+        )])
         reply_markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
         
         await callback.message.edit_text(result_text, reply_markup=reply_markup)
@@ -252,22 +261,34 @@ def register_handlers():
         
         consultation_text = (
             "👨‍⚕️ Для получения консультации специалиста:\n\n"
+            "Вы можете записаться на консультацию через наше приложение или связаться с нами напрямую.\n\n"
             "📞 Позвоните: +7 (XXX) XXX-XX-XX\n"
             "📧 Email: consultation@example.com\n"
-            "🌐 Веб-сайт: www.example.com\n\n"
             "Время работы: Пн-Пт 9:00-18:00"
         ) if language == "ru" else (
             "👨‍⚕️ To get specialist consultation:\n\n"
+            "You can book a consultation through our app or contact us directly.\n\n"
             "📞 Call: +1 (XXX) XXX-XXXX\n"
             "📧 Email: consultation@example.com\n"
-            "🌐 Website: www.example.com\n\n"
             "Working hours: Mon-Fri 9:00-18:00"
         )
         
-        keyboard = [[InlineKeyboardButton(
+        # Создаем кнопки
+        keyboard = []
+        
+        # Кнопка для перехода в приложение (если URL настроен)
+        if settings.CONSULTATION_URL:
+            keyboard.append([InlineKeyboardButton(
+                text="📱 Записаться на консультацию" if language == "ru" else "📱 Book Consultation",
+                url=settings.CONSULTATION_URL
+            )])
+        
+        # Кнопка возврата
+        keyboard.append([InlineKeyboardButton(
             text="← Назад к результатам" if language == "ru" else "← Back to results",
             callback_data="back_to_results"
-        )]]
+        )])
+        
         reply_markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
         
         await callback.message.edit_text(consultation_text, reply_markup=reply_markup)
@@ -317,11 +338,22 @@ def register_handlers():
         report += f"Ответов 'Иногда': {sometimes_count}\n" if language == "ru" else f"'Sometimes' answers: {sometimes_count}\n"
         report += f"Затруднились ответить: {difficult_count}\n\n" if language == "ru" else f"Difficult to answer: {difficult_count}\n\n"
         
+        # Кнопки
+        keyboard = []
+        
+        # Кнопка для перехода в приложение (если URL настроен)
+        if settings.MAIN_PAGE_URL:
+            keyboard.append([InlineKeyboardButton(
+                text="📱 Открыть приложение" if language == "ru" else "📱 Open App",
+                url=settings.MAIN_PAGE_URL
+            )])
+        
         # Кнопка возврата
-        keyboard = [[InlineKeyboardButton(
+        keyboard.append([InlineKeyboardButton(
             text="← Назад к результатам" if language == "ru" else "← Back to results",
             callback_data="back_to_results"
-        )]]
+        )])
+        
         reply_markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
         
         await callback.message.edit_text(report, reply_markup=reply_markup)
@@ -352,11 +384,22 @@ def register_handlers():
             materials += "• Prevention guidelines\n\n"
             materials += "📞 Hotline: 1-800-XXX-XXXX"
         
+        # Кнопки
+        keyboard = []
+        
+        # Кнопка для перехода в приложение (если URL настроен)
+        if settings.MAIN_PAGE_URL:
+            keyboard.append([InlineKeyboardButton(
+                text="📱 Открыть приложение" if language == "ru" else "📱 Open App",
+                url=settings.MAIN_PAGE_URL
+            )])
+        
         # Кнопка возврата
-        keyboard = [[InlineKeyboardButton(
+        keyboard.append([InlineKeyboardButton(
             text="← Назад к результатам" if language == "ru" else "← Back to results",
             callback_data="back_to_results"
-        )]]
+        )])
+        
         reply_markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
         
         await callback.message.edit_text(materials, reply_markup=reply_markup)

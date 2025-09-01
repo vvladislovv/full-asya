@@ -229,4 +229,85 @@ export class QuestionnairesService {
     const res = await this.prisma.questionnaireResult.deleteMany({ where: { telegramId } });
     return { deleted: res.count };
   }
+
+  async create(data: any): Promise<any> {
+    this.logger.log(`Creating questionnaire for telegram_id: ${data.telegramId}`);
+    
+    try {
+      // Создаем или находим пользователя по telegram_id
+      let user = await this.prisma.user.findFirst({
+        where: { telegramId: data.telegramId.toString() }
+      });
+
+      if (!user) {
+        user = await this.prisma.user.create({
+          data: {
+            telegramId: data.telegramId.toString(),
+            firstName: data.firstName || 'Telegram User',
+            lastName: data.lastName || '',
+            isActive: true,
+          }
+        });
+        this.logger.log(`Created new user for telegram_id: ${data.telegramId}`);
+      }
+
+      // Создаем запись анкеты
+      const questionnaire = await this.prisma.questionnaire.create({
+        data: {
+          userId: user.id,
+          telegramId: data.telegramId,
+          answers: data.answers,
+          status: 'COMPLETED',
+          completedAt: data.completedAt || new Date(),
+        }
+      });
+
+      this.logger.log(`Questionnaire created with ID: ${questionnaire.id}`);
+      return questionnaire;
+    } catch (error) {
+      this.logger.error(`Error creating questionnaire: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  async createResult(data: any): Promise<any> {
+    this.logger.log(`Creating questionnaire result for telegram_id: ${data.telegramId}`);
+    
+    try {
+      // Создаем или находим пользователя по telegram_id
+      let user = await this.prisma.user.findFirst({
+        where: { telegramId: data.telegramId.toString() }
+      });
+
+      if (!user) {
+        user = await this.prisma.user.create({
+          data: {
+            telegramId: data.telegramId.toString(),
+            firstName: 'Telegram User',
+            lastName: '',
+            isActive: true,
+          }
+        });
+        this.logger.log(`Created new user for telegram_id: ${data.telegramId}`);
+      }
+
+      // Создаем запись результата анкеты
+      const result = await this.prisma.questionnaireResult.create({
+        data: {
+          userId: user.id,
+          telegramId: data.telegramId,
+          riskLevel: data.riskLevel,
+          score: data.score,
+          recommendations: data.recommendations,
+          completedAt: data.completedAt || new Date(),
+        }
+      });
+
+      this.logger.log(`Questionnaire result created with ID: ${result.id}`);
+      return result;
+    } catch (error) {
+      this.logger.error(`Error creating questionnaire result: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
 }

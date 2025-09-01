@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
-import { LoginDto, RefreshTokenDto, TelegramAuthDto } from './dto';
+import { LoginDto, RefreshTokenDto, TelegramAuthDto, TelegramMiniAppDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Authentication')
@@ -24,6 +24,14 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async telegramAuth(@Body() telegramAuthDto: TelegramAuthDto): Promise<{ access_token: string; user: User }> {
     return await this.authService.telegramAuth(telegramAuthDto);
+  }
+
+  @Post('telegram-mini-app')
+  @ApiOperation({ summary: 'Authenticate with Telegram Mini App initData' })
+  @ApiResponse({ status: 200, description: 'Authentication successful' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async telegramMiniAppAuth(@Body() telegramMiniAppDto: TelegramMiniAppDto): Promise<{ access_token: string; user: User }> {
+    return await this.authService.telegramMiniAppAuth(telegramMiniAppDto);
   }
 
   @Post('refresh')

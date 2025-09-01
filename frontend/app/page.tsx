@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { LoginPage } from "./auth/LoginPage";
 import ExtensionCleanup from "./components/ExtensionCleanup";
 
-import SafeHydration from "./components/SafeHydration";
 import { useLanguage } from "@/app/hooks/useLanguage";
+import { isTelegramWebApp } from "./api/services/telegramService";
+import SafeHydration from "./components/SafeHydration";
 import { useAuth } from "./providers/useAuth";
 
 export default function Home() {
@@ -16,7 +17,40 @@ export default function Home() {
   // 2 Получаем функции для работы с языками
   const { t } = useLanguage();
   
-  // 3 Если нет пользователя то отправляем на регистрацию
+  // 3 Проверяем, запущено ли приложение в Telegram Mini App
+  const isTelegram = isTelegramWebApp();
+  
+  // 4 Если не в Telegram Mini App, показываем сообщение
+  if (!isTelegram) {
+    return (
+      <div className="bg-[#E8ECF5] w-screen h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="mb-6">
+            <Image 
+              src="/icons/telegram.svg" 
+              alt="Telegram" 
+              width="80" 
+              height="80" 
+              className="mx-auto mb-4"
+            />
+          </div>
+          <h1 className="text-2xl font-bold text-[#0E0F0F] mb-4">
+            {t('telegram.title')}
+          </h1>
+          <p className="text-[#0E0F0F] opacity-70 mb-6">
+            {t('telegram.description')}
+          </p>
+          <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <p className="text-sm text-[#0E0F0F] opacity-60">
+              {t('telegram.instruction')}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // 5 Если нет пользователя то отправляем на регистрацию
   if (!user) {
     return <LoginPage />
   }

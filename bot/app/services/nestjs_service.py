@@ -30,7 +30,7 @@ class NestJSService:
             logger.info(f"Sending questionnaire data to NestJS backend: {questionnaire_data.get('telegram_id')}")
             
             response = await self.client.post(
-                f"{self.base_url}/api/questionnaires",
+                f"{self.base_url}/api/telegram/questionnaire",
                 json=questionnaire_data,
                 headers={"Content-Type": "application/json"}
             )
@@ -60,7 +60,7 @@ class NestJSService:
             logger.info(f"Sending questionnaire result to NestJS backend: {result_data.get('telegram_id')}")
             
             response = await self.client.post(
-                f"{self.base_url}/api/questionnaires/result",
+                f"{self.base_url}/api/telegram/questionnaire/result",
                 json=result_data,
                 headers={"Content-Type": "application/json"}
             )

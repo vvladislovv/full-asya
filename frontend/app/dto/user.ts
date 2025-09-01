@@ -6,6 +6,7 @@ export type User = {
     firstName?: string,
     lastName?: string,
     telegramPhotoUrl?: string,
+    photoUrl?: string,
 
     language: string,
 

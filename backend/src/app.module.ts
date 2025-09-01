@@ -14,6 +14,7 @@ import { HistoryModule } from '@modules/history/history.module';
 import { I18nModule } from '@modules/i18n/i18n.module';
 import { PracticesModule } from '@modules/practices/practices.module';
 import { QuestionnairesModule } from '@modules/questionnaires/questionnaires.module';
+import { TelegramModule } from '@modules/telegram/telegram.module';
 import { TestScoringModule } from '@modules/test-scoring/test-scoring.module';
 import { TestStagesModule } from '@modules/test-stages/test-stages.module';
 import { TestsModule } from '@modules/tests/tests.module';
@@ -71,6 +72,7 @@ import { SecurityMiddleware } from '@common/middleware/security.middleware';
     QuestionnairesModule,
     EmotionalStateModule,
     DementiaScreeningModule,
+    TelegramModule,
   ],
   providers: [
     {

@@ -1,7 +1,7 @@
 "use client";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import Image from "next/image";
 import Link from "next/link";
-import { useLanguage } from "@/app/hooks/useLanguage";
 import { useAuth } from "../providers/useAuth";
 
 const Profile : React.FC = () => {
@@ -41,10 +41,10 @@ const Profile : React.FC = () => {
             <div className="flex justify-center">
                 <div className="flex flex-col items-center gap-1">
                     <div className="relative w-[100px] h-[100px] rounded-full border-2 border-[#8DC63F]">
-                        {user?.telegramPhotoUrl ? (
+                        {user?.photoUrl || user?.telegramPhotoUrl ? (
                             <Image 
-                                src={user.telegramPhotoUrl} 
-                                alt="Telegram Avatar" 
+                                src={user.photoUrl || user.telegramPhotoUrl} 
+                                alt="User Avatar" 
                                 className="object-cover rounded-full" 
                                 fill
                             />

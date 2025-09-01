@@ -11,6 +11,11 @@
         "cancel": "Cancel",
         "user": "User"
     },
+    "telegram": {
+        "title": "Open in Telegram",
+        "description": "This app works only in Telegram Mini App",
+        "instruction": "Open the app through Telegram bot by clicking the 'Open App' button"
+    },
     "auth": {
         "welcome": "Welcome",
         "login_prompt": "Sign in to your account",

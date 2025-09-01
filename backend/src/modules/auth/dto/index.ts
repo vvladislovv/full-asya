@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class LoginDto {
   @ApiProperty()
@@ -35,6 +35,17 @@ export class TelegramAuthDto {
   @IsOptional()
   @IsString()
   auth_date?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  hash?: string;
+}
+
+export class TelegramMiniAppDto {
+  @ApiProperty()
+  @IsString()
+  initData: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

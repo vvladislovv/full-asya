@@ -1,13 +1,22 @@
 // Авторизация через Telegram Mini App
 export async function loginTelegram(telegramInitData: string) {
-    return await apiFetch<LoginDto>('/auth/telegram', {
+    return await apiFetch<LoginDto>('/auth/telegram-mini-app', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ telegramInitData })
+        body: JSON.stringify({ 
+            initData: telegramInitData,
+            hash: extractHashFromInitData(telegramInitData)
+        })
     });
+}
+
+// Извлечение hash из initData для валидации
+function extractHashFromInitData(initData: string): string | null {
+    const urlParams = new URLSearchParams(initData);
+    return urlParams.get('hash');
 }
 import { LoginDto, User } from "@/app/dto/user";
 import { apiFetch } from "../api";

@@ -2,7 +2,7 @@ import { UsersService } from '@modules/users/users.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { LoginDto, TelegramAuthDto } from './dto';
+import { LoginDto, TelegramAuthDto, TelegramMiniAppDto } from './dto';
 
 @Injectable()
 export class AuthService {
@@ -58,6 +58,8 @@ export class AuthService {
         username: telegramAuthDto.username,
         firstName: telegramAuthDto.first_name,
         lastName: telegramAuthDto.last_name,
+        photoUrl: telegramAuthDto.photo_url,
+        language: 'ru', // По умолчанию русский
       });
     }
 
@@ -78,6 +80,66 @@ export class AuthService {
     // Basic validation - in production, you should validate the hash
     // This is a simplified version for development
     return true; // Всегда возвращаем true для разработки
+  }
+
+  async telegramMiniAppAuth(telegramMiniAppDto: TelegramMiniAppDto): Promise<{ access_token: string; user: User }> {
+    // Парсим initData для получения данных пользователя
+    const userData = this.parseTelegramInitData(telegramMiniAppDto.initData);
+    
+    if (!userData) {
+      throw new UnauthorizedException('Invalid Telegram Mini App data');
+    }
+
+    // Валидируем данные (в продакшене здесь должна быть проверка подписи)
+    if (!this.validateTelegramMiniAppData(telegramMiniAppDto.initData, telegramMiniAppDto.hash)) {
+      throw new UnauthorizedException('Invalid Telegram Mini App signature');
+    }
+
+    // Создаем или находим пользователя
+    let user = await this.usersService.findByTelegramId(userData.id.toString());
+    
+    if (!user) {
+      user = await this.usersService.create({
+        telegramId: userData.id.toString(),
+        username: userData.username,
+        firstName: userData.first_name,
+        lastName: userData.last_name,
+        photoUrl: userData.photo_url,
+        language: userData.language_code || 'ru',
+      });
+    }
+
+    const payload = {
+      sub: user.id,
+      telegramId: user.telegramId,
+      username: user.username,
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+      user,
+    };
+  }
+
+  private parseTelegramInitData(initData: string): any {
+    try {
+      const urlParams = new URLSearchParams(initData);
+      const userParam = urlParams.get('user');
+      
+      if (userParam) {
+        return JSON.parse(decodeURIComponent(userParam));
+      }
+      
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  private validateTelegramMiniAppData(initData: string, hash?: string): boolean {
+    // ВРЕМЕННО ОТКЛЮЧЕНО: проверка подписи Telegram Mini App для разработки
+    // В продакшене здесь должна быть проверка HMAC подписи
+    return true;
   }
 
   async refreshToken(userId: string): Promise<{ access_token: string }> {

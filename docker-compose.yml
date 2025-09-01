@@ -68,6 +68,11 @@ services:
     environment:
       NESTJS_BACKEND_URL: http://backend:3000
       DATABASE_URL: postgresql://asya_user:asya_password@postgres:5432/asya_db
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      CONSULTATION_URL: ${CONSULTATION_URL:-}
+      MAIN_PAGE_URL: ${MAIN_PAGE_URL:-}
+      DEBUG: ${DEBUG:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
     depends_on:
       backend:
         condition: service_healthy

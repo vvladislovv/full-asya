@@ -11,6 +11,11 @@
         "cancel": "Отменить",
         "user": "Пользователь"
     },
+    "telegram": {
+        "title": "Откройте в Telegram",
+        "description": "Это приложение работает только в Telegram Mini App",
+        "instruction": "Откройте приложение через Telegram бота, нажав кнопку 'Открыть приложение'"
+    },
     "auth": {
         "welcome": "Добро пожаловать",
         "login_prompt": "Войдите в свой аккаунт",

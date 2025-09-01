@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     # Telegram Bot
     TELEGRAM_BOT_TOKEN: str = ""
     
+    # Web App URLs
+    CONSULTATION_URL: str = ""
+    MAIN_PAGE_URL: str = ""
+    
     # Логирование
     LOG_LEVEL: str = "INFO"
     LOG_FILE: str = "logs/asyabot.log"

@@ -1,6 +1,6 @@
 "use client";
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { autoLoginTestUser, getCurrentUser } from '../api/services/authService';
+import { autoLoginTestUser, getCurrentUser, login, loginTelegram } from '../api/services/authService';
 import { getTelegramPhotoUrl, getTelegramUser, initTelegramWebApp, isTelegramWebApp } from '../api/services/telegramService';
 import type { User } from '../dto/user';
 
@@ -58,21 +58,42 @@ export function AuthProvider({children} : {children: ReactNode}) {
                     // Получаем фото пользователя из Telegram
                     const telegramPhotoUrl = getTelegramPhotoUrl();
                     
-                    // Здесь должна быть авторизация через Telegram initData
-                    // Пока используем telegramId для авторизации
-                    const loginResult = await autoLoginTestUser(); // Заменить на реальную Telegram авторизацию
-                    if (loginResult) {
-                        // Обогащаем данные пользователя Telegram информацией
-                        const enrichedUser = {
-                            ...loginResult.user,
-                            telegramId: telegramUser.id,
-                            firstName: telegramUser.first_name,
-                            lastName: telegramUser.last_name,
-                            username: telegramUser.username,
-                            telegramPhotoUrl: telegramPhotoUrl,
-                            language: telegramUser.language_code || 'en'
-                        };
-                        setUser(enrichedUser);
+                    // Авторизация через Telegram API
+                    const authData = getTelegramAuthData();
+                    if (authData) {
+                        const loginResult = await loginTelegram(authData.initData);
+                        if (loginResult) {
+                            localStorage.setItem('access_token', loginResult.access_token);
+                            // Обогащаем данные пользователя Telegram информацией
+                            const enrichedUser = {
+                                ...loginResult.user,
+                                telegramId: telegramUser.id,
+                                firstName: telegramUser.first_name,
+                                lastName: telegramUser.last_name,
+                                username: telegramUser.username,
+                                telegramPhotoUrl: telegramPhotoUrl,
+                                photoUrl: loginResult.user.photoUrl || telegramPhotoUrl,
+                                language: telegramUser.language_code || 'ru'
+                            };
+                            setUser(enrichedUser);
+                        }
+                    } else {
+                        // Fallback на авторизацию по telegramId
+                        const loginResult = await login(telegramUser.id.toString());
+                        if (loginResult) {
+                            localStorage.setItem('access_token', loginResult.access_token);
+                            const enrichedUser = {
+                                ...loginResult.user,
+                                telegramId: telegramUser.id,
+                                firstName: telegramUser.first_name,
+                                lastName: telegramUser.last_name,
+                                username: telegramUser.username,
+                                telegramPhotoUrl: telegramPhotoUrl,
+                                photoUrl: loginResult.user.photoUrl || telegramPhotoUrl,
+                                language: telegramUser.language_code || 'ru'
+                            };
+                            setUser(enrichedUser);
+                        }
                     }
                 } catch (error) {
                     console.error('Ошибка Telegram авторизации:', error);
