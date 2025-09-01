@@ -1,71 +1,12 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getUserStats, UserStatsResponse } from "../api/services/testService";
-
 import { useLanguage } from "../hooks/useLanguage";
 import { useAuth } from "../providers/useAuth";
-import { formatDateSafe } from "../utils/dateUtils";
-
-interface UserStats {
-    totalTests: number;
-    completedTests: number;
-    averageScore: number;
-    lastTestDate: string | null;
-    riskLevel: 'low' | 'medium' | 'high' | null;
-}
 
 const Profile : React.FC = () => {
     const { user } = useAuth();
     const { t } = useLanguage();
-    const [userStats, setUserStats] = useState<UserStats | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    // Загрузка статистики пользователя
-    useEffect(() => {
-        const loadUserStats = async () => {
-            if (!user) return;
-            
-            try {
-                setLoading(true);
-                const stats: UserStatsResponse = await getUserStats();
-                
-                // Преобразуем данные API в нужный формат с правильными типами
-                const formattedStats: UserStats = {
-                    totalTests: stats.totalTests || 0,
-                    completedTests: stats.completedTests || 0,
-                    averageScore: Math.round(stats.averageScore || 0),
-                    lastTestDate: stats.lastTestDate && typeof stats.lastTestDate === 'string' && stats.lastTestDate.length > 0
-                        ? formatDateSafe(stats.lastTestDate, 'ru-RU', 'Дата недоступна') 
-                        : null,
-                    riskLevel: stats.riskLevel || 'low'
-                };
-                
-                setUserStats(formattedStats);
-            } catch (error) {
-                console.error('Ошибка загрузки статистики:', error);
-                setError('Не удалось загрузить статистику');
-                // getUserStats уже возвращает fallback данные при ошибке
-                setUserStats(null);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadUserStats();
-    }, [user]);
-
-    if (loading) {
-        return (
-            <div className="bg-[#F2F5F9] w-screen h-screen px-4 py-6 flex flex-col gap-3">
-                <div className="flex justify-center items-center py-8">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8DC63F]"></div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="bg-[#F2F5F9] w-screen h-screen px-4 py-6 flex flex-col gap-3">
@@ -85,14 +26,7 @@ const Profile : React.FC = () => {
                 </div>
 
             </div>
-            
-            {/* Ошибка */}
-            {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
-                    <span>⚠️</span>
-                    <p className="text-[14px]">{error}</p>
-                </div>
-            )}
+
             
             {/* Telegram ID вместо статуса подключения */}
             {user?.telegramId && (
@@ -129,39 +63,7 @@ const Profile : React.FC = () => {
                             : user?.firstName || user?.username || t('common.user')
                         }
                     </div>
-                    {/* Статистика пользователя */}
-                    <div className="text-center mt-2">
-                        {userStats ? (
-                            <>
-                                <div className="font-[400] text-[12px] text-gray-800">
-                                    {t('profile.tests_completed')}: {userStats.completedTests} {t('history.score_from')} {userStats.totalTests}
-                                </div>
-                                <div className="font-[400] text-[12px] text-gray-800">
-                                    {t('profile.average_score')}: {userStats.averageScore}%
-                                </div>
-                                {userStats.lastTestDate && (
-                                    <div className="font-[400] text-[12px] text-gray-800">
-                                        {t('profile.last_test')}: {userStats.lastTestDate}
-                                    </div>
-                                )}
-                                {userStats.riskLevel && (
-                                    <div className="font-[400] text-[12px] mt-1">
-                                        <span className={`px-2 py-1 rounded-full text-[10px] font-[500] ${
-                                            userStats.riskLevel === 'low' ? 'bg-green-100 text-green-700' :
-                                            userStats.riskLevel === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                                            'bg-red-100 text-red-700'
-                                        }`}>
-                                            {t(`profile.risk_level.${userStats.riskLevel}`, userStats.riskLevel)}
-                                        </span>
-                                    </div>
-                                )}
-                            </>
-                        ) : (
-                            <div className="font-[400] text-[12px] text-gray-600">
-                                {loading ? t('common.loading') : t('profile.no_stats', 'Статистика недоступна')}
-                            </div>
-                        )}
-                    </div>
+
                     
                     {/* Дополнительная информация пользователя */}
                     {user && (

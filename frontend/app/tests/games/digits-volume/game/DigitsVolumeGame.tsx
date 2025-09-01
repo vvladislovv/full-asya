@@ -70,8 +70,7 @@ const DigitsVolumeGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurre
                     details: answers
                 },
                 timeSpent,
-                maxScore: totalAnswers,
-                testType: 'DIGIT_SPAN'
+                maxScore: totalAnswers
             });
             console.log('Результат теста отправлен успешно');
         } catch (error) {

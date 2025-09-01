@@ -33,7 +33,7 @@ export class HistoryController {
   @Get('stats')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @CacheResponse({ ttl: 300, keyPrefix: 'user-stats' }) // Кэш на 5 минут
+  @CacheResponse({ ttl: 10, keyPrefix: 'user-stats' }) // Кэш на 10 секунд для тестирования
   @Throttle({ medium: { limit: 10, ttl: 10000 } }) // 10 запросов в 10 секунд
   @ApiOperation({ summary: 'Get user statistics' })
   @ApiResponse({ status: 200, description: 'User statistics retrieved' })

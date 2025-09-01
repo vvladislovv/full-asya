@@ -20,7 +20,7 @@ export class AuthService {
         telegramId,
         username: `user_${telegramId}`,
         firstName: `User`,
-        language: 'ru' as any,
+        language: 'en' as any,
       });
     }
     

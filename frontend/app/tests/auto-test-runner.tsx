@@ -50,13 +50,19 @@ const AutoTestRunner: React.FC<AutoTestRunnerProps> = ({ onComplete }) => {
                 if (tests && tests.length > 0) {
                     const updatedTests = AUTO_TESTS.map(autoTest => {
                         const realTest = tests.find(t => t.type === autoTest.type);
-                        return realTest ? { ...autoTest, testId: realTest.id } : autoTest;
-                    });
+                        return realTest ? { ...autoTest, testId: realTest.id } : null;
+                    }).filter(test => test !== null) as TestConfig[];
                     
-                    setRealTests(updatedTests);
-                    addLog(`✅ Загружено ${updatedTests.filter(t => t.testId).length} реальных тестов из API`);
+                    if (updatedTests.length > 0) {
+                        setRealTests(updatedTests);
+                        addLog(`✅ Загружено ${updatedTests.length} реальных тестов из API`);
+                    } else {
+                        addLog('⚠️ Не удалось сопоставить тесты с API');
+                        setRealTests([]);
+                    }
                 } else {
-                    addLog('⚠️ API не вернул тесты, используем fallback ID');
+                    addLog('⚠️ API не вернул тесты, тесты недоступны');
+                    setRealTests([]);
                 }
             } catch (error) {
                 addLog(`❌ Ошибка загрузки тестов: ${error}`);
@@ -79,11 +85,14 @@ const AutoTestRunner: React.FC<AutoTestRunnerProps> = ({ onComplete }) => {
         try {
             addLog(`Начинаю тест: ${testConfig.name}`);
             
-            // Если нет testId, используем тип как ID
-            const testIdToUse = testConfig.testId || `test_${testConfig.type.toLowerCase()}`;
+            // Проверяем, что у нас есть правильный testId
+            if (!testConfig.testId) {
+                addLog(`❌ У теста ${testConfig.name} отсутствует testId, пропускаем`);
+                return false;
+            }
             
             // Начинаем тест
-            const testResult = await startTest(testIdToUse);
+            const testResult = await startTest(testConfig.testId);
             addLog(`Тест начат с ID: ${testResult.id}`);
             
             // Генерируем случайные результаты
@@ -109,10 +118,8 @@ const AutoTestRunner: React.FC<AutoTestRunnerProps> = ({ onComplete }) => {
                 },
                 timeSpent,
                 maxScore: totalQuestions,
-                testType: testConfig.type,
                 emotionalState: {
-                    mood: ['excellent', 'good', 'neutral'][Math.floor(Math.random() * 3)],
-                    energy: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)]
+                    mood: ['excellent', 'good', 'neutral'][Math.floor(Math.random() * 3)]
                 }
             });
             
@@ -135,10 +142,23 @@ const AutoTestRunner: React.FC<AutoTestRunnerProps> = ({ onComplete }) => {
         addLog('Начинаю автоматическое прохождение всех тестов...');
         
         const completed: string[] = [];
-        const testsToRun = testsLoaded ? realTests : AUTO_TESTS;
+        const testsToRun = testsLoaded && realTests.length > 0 ? realTests : [];
+        
+        if (testsToRun.length === 0) {
+            addLog('❌ Нет доступных тестов для запуска');
+            setIsRunning(false);
+            return;
+        }
         
         for (let i = 0; i < testsToRun.length; i++) {
             const test = testsToRun[i];
+            
+            // Проверяем, что у теста есть правильный testId
+            if (!test.testId) {
+                addLog(`⚠️ Пропускаем тест ${test.name} - отсутствует testId`);
+                continue;
+            }
+            
             setCurrentTestIndex(i);
             setCurrentTest(test);
             setProgress(Math.round((i / testsToRun.length) * 100));
@@ -193,7 +213,7 @@ const AutoTestRunner: React.FC<AutoTestRunnerProps> = ({ onComplete }) => {
         <div className="min-h-screen bg-gray-50 p-4">
             <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
                 <h1 className="text-2xl font-bold text-center mb-6">
-                    🤖 Автоматическое тестирование всех 8 тестов
+                    🤖 Автоматическое тестирование {realTests.length > 0 ? `${realTests.length} тестов` : 'тестов'}
                 </h1>
                 
                 <div className="mb-6">
@@ -215,13 +235,13 @@ const AutoTestRunner: React.FC<AutoTestRunnerProps> = ({ onComplete }) => {
                             Текущий тест: {currentTest.name}
                         </h3>
                         <p className="text-sm text-blue-600">
-                            Тест {currentTestIndex + 1} из {AUTO_TESTS.length}
+                            Тест {currentTestIndex + 1} из {realTests.length}
                         </p>
                     </div>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    {(testsLoaded ? realTests : AUTO_TESTS).map((test, index) => (
+                    {realTests.length > 0 ? realTests.map((test, index) => (
                         <div 
                             key={test.type}
                             className={`p-3 rounded-lg border ${
@@ -244,20 +264,27 @@ const AutoTestRunner: React.FC<AutoTestRunnerProps> = ({ onComplete }) => {
                                 {test.testId && <span className="ml-2 text-green-600">✓ API</span>}
                             </div>
                         </div>
-                    ))}
+                    )) : (
+                        <div className="col-span-2 text-center py-8 text-gray-500">
+                            {testsLoaded ? 'Нет доступных тестов для автотестирования' : 'Загрузка тестов...'}
+                        </div>
+                    )}
                 </div>
 
                 <div className="text-center mb-6">
                     <button
                         onClick={runAllTests}
-                        disabled={isRunning || !testsLoaded}
+                        disabled={isRunning || !testsLoaded || realTests.length === 0}
                         className={`px-8 py-3 rounded-lg font-semibold ${
-                            isRunning || !testsLoaded
+                            isRunning || !testsLoaded || realTests.length === 0
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : 'bg-green-500 text-white hover:bg-green-600'
                         }`}
                     >
-                        {isRunning ? 'Выполняется...' : testsLoaded ? 'Запустить все тесты' : 'Загрузка...'}
+                        {isRunning ? 'Выполняется...' : 
+                         !testsLoaded ? 'Загрузка...' : 
+                         realTests.length === 0 ? 'Нет доступных тестов' : 
+                         `Запустить все тесты (${realTests.length})`}
                     </button>
                 </div>
 

@@ -22,7 +22,7 @@ export class CreateUserDto {
   @IsString()
   lastName?: string;
 
-  @ApiProperty({ required: false, default: 'ru', enum: Language })
+  @ApiProperty({ required: false, default: 'en', enum: Language })
   @IsOptional()
   @IsEnum(Language)
   language?: Language;

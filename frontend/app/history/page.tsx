@@ -2,142 +2,170 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getUserHistory, TestHistoryItem } from "../api/services/testService";
 
-import { autoLoginTestUser } from "../api/services/authService";
 import { useLanguage } from "../hooks/useLanguage";
 import { useAuth } from "../providers/useAuth";
-import { formatDateSafe } from "../utils/dateUtils";
 
-interface HistoryItem {
+// Интерфейс для результата теста
+interface TestResult {
     id: string;
-    date: string;
     testType: string;
-    testName: string;
     score: number;
     maxScore: number;
     percentage: number;
     resultLevel: 'high' | 'medium' | 'low';
-    status: 'completed' | 'in_progress' | 'failed';
+    completedAt: string;
+    test?: {
+        name: string;
+        type: string;
+        difficulty: string;
+    };
 }
 
-const History : React.FC = () => {
+// Функция для получения истории тестов напрямую
+async function fetchTestHistory(): Promise<TestResult[]> {
+    try {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            console.warn('Нет токена авторизации');
+            return [];
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/history?limit=100`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            console.error('Ошибка API:', response.status, response.statusText);
+            return [];
+        }
+
+        const data = await response.json();
+        console.log('📋 Данные API истории:', data);
+
+        // Обрабатываем разные форматы ответа
+        let results: any[] = [];
+        
+        if (Array.isArray(data)) {
+            results = data;
+        } else if (data && typeof data === 'object') {
+            // Если это объект с числовыми ключами, преобразуем в массив
+            results = Object.values(data);
+        }
+
+        console.log(`✅ Обработано ${results.length} результатов`);
+
+        // Преобразуем к нужному формату
+        return results.map((item: any) => ({
+            id: item.id,
+            testType: item.testType,
+            score: item.score || 0,
+            maxScore: item.maxScore || 10,
+            percentage: item.percentage || 0,
+            resultLevel: item.resultLevel || 'medium',
+            completedAt: item.completedAt || item.createdAt,
+            test: item.test
+        })).sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
+
+    } catch (error) {
+        console.error('❌ Ошибка загрузки истории:', error);
+        return [];
+    }
+}
+
+// Названия тестов на русском
+const getTestName = (testType: string, testObj?: any): string => {
+    if (testObj?.name) return testObj.name;
+    
+    const names: Record<string, string> = {
+        'VISUAL_MEMORY': 'Визуальная память',
+        'VERBAL_MEMORY': 'Вербальная память', 
+        'AUDITORY_MEMORY': 'Рече-слуховая память',
+        'DIGIT_SPAN': 'Объём цифр',
+        'VISUAL_ATTENTION': 'Зрительное внимание',
+        'STROOP_TEST': 'Тест Струпа',
+        'ARITHMETIC': 'Счётные операции',
+        'SYMBOL_MEMORY': 'Символьная память'
+    };
+    return names[testType] || testType;
+};
+
+// Функция форматирования даты
+const formatDate = (dateString: string): string => {
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch {
+        return 'Дата недоступна';
+    }
+};
+
+// Цвет для уровня результата
+const getResultColor = (level: string): string => {
+    switch (level) {
+        case 'high': return '#8DC63F';
+        case 'medium': return '#FDB933';
+        case 'low': return '#D9452B';
+        default: return '#8DC63F';
+    }
+};
+
+// Текст для уровня результата
+const getResultText = (level: string, percentage: number): string => {
+    const percent = Math.round(percentage);
+    switch (level) {
+        case 'high': return `${percent}% - Высокий`;
+        case 'medium': return `${percent}% - Средний`;
+        case 'low': return `${percent}% - Низкий`;
+        default: return `${percent}%`;
+    }
+};
+
+const History: React.FC = () => {
     const { user } = useAuth();
     const { t } = useLanguage();
-    const [historyData, setHistoryData] = useState<HistoryItem[]>([]);
+    const [historyData, setHistoryData] = useState<TestResult[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Загрузка истории тестов
+    // Загрузка истории
     useEffect(() => {
         const loadHistory = async () => {
             try {
                 setLoading(true);
                 setError(null);
                 
-                // Проверяем наличие токена
-                const token = localStorage.getItem('access_token');
-                if (!token) {
-                    console.log('Нет токена авторизации, проверяем локальные данные');
-                    // Загружаем локальные данные
-                    const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
-                    if (localResults.length > 0) {
-                        const formattedHistory: HistoryItem[] = localResults.map((item: any) => ({
-                            id: item.id || `local-${Date.now()}-${Math.random()}`,
-                            date: formatDateSafe(item.completedAt || item.createdAt, 'ru-RU', 'Дата недоступна'),
-                            testType: item.testType || 'UNKNOWN',
-                            testName: t(`test_types.${item.testType}`, item.testName || 'Неизвестный тест'),
-                            score: item.score || 0,
-                            maxScore: item.maxScore || 10,
-                            percentage: item.percentage || ((item.score || 0) / (item.maxScore || 10)) * 100,
-                            resultLevel: item.resultLevel || getResultLevel(item.score || 0, item.maxScore || 10),
-                            status: item.isCompleted ? 'completed' : 'in_progress'
-                        }));
-                        setHistoryData(formattedHistory);
-                    } else {
-                        setHistoryData([]);
-                    }
-                    setLoading(false);
-                    return;
-                }
+                console.log('🔄 Загружаем историю тестов...');
+                const results = await fetchTestHistory();
                 
-                // Если есть токен, пробуем загрузить с бэкенда
-                const response: TestHistoryItem[] = await getUserHistory({ limit: 50 });
+                console.log(`📊 Загружено результатов: ${results.length}`);
+                setHistoryData(results);
                 
-                // getUserHistory уже возвращает массив или пустой массив при ошибке
-                const formattedHistory: HistoryItem[] = response.map((item: TestHistoryItem) => ({
-                    id: item.id,
-                    date: formatDateSafe(item.completedAt || item.createdAt, 'ru-RU', 'Дата недоступна'),
-                    testType: item.testType || item.test?.type || 'UNKNOWN',
-                    testName: item.test?.name || t(`test_types.${item.testType}`, 'Неизвестный тест'),
-                    score: item.score || 0,
-                    maxScore: item.maxScore || item.test?.maxScore || 10,
-                    percentage: item.percentage || ((item.score || 0) / (item.maxScore || item.test?.maxScore || 10)) * 100,
-                    resultLevel: getResultLevel(item.score || 0, item.maxScore || item.test?.maxScore || 10),
-                    status: item.isCompleted ? 'completed' : 'in_progress'
-                }));
-                
-                setHistoryData(formattedHistory);
             } catch (error) {
-                console.error('Ошибка загрузки истории:', error);
-                // Пробуем загрузить локальные данные при ошибке
-                const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
-                if (localResults.length > 0) {
-                    const formattedHistory: HistoryItem[] = localResults.map((item: any) => ({
-                        id: item.id || `local-${Date.now()}-${Math.random()}`,
-                        date: formatDateSafe(item.completedAt || item.createdAt, 'ru-RU', 'Дата недоступна'),
-                        testType: item.testType || 'UNKNOWN',
-                        testName: t(`test_types.${item.testType}`, item.testName || 'Неизвестный тест'),
-                        score: item.score || 0,
-                        maxScore: item.maxScore || 10,
-                        percentage: item.percentage || ((item.score || 0) / (item.maxScore || 10)) * 100,
-                        resultLevel: item.resultLevel || getResultLevel(item.score || 0, item.maxScore || 10),
-                        status: item.isCompleted ? 'completed' : 'in_progress'
-                    }));
-                    setHistoryData(formattedHistory);
-                    setError(null); // Убираем ошибку, если есть локальные данные
-                } else {
-                    setError('Не удалось загрузить историю тестов. Попробуйте перезагрузить страницу.');
-                    setHistoryData([]);
-                }
+                console.error('❌ Ошибка загрузки истории:', error);
+                setError('Не удалось загрузить историю тестов');
             } finally {
                 setLoading(false);
             }
         };
 
-        loadHistory();
-    }, [user, t]);
-
-    const getResultLevel = (score: number, maxScore: number): 'high' | 'medium' | 'low' => {
-        const percentage = (score / maxScore) * 100;
-        if (percentage >= 80) return 'high';
-        if (percentage >= 60) return 'medium';
-        return 'low';
-    };
-
-    const getResultColor = (resultLevel: string) => {
-        switch (resultLevel) {
-            case "low":
-                return "#D9452B";
-            case "medium":
-                return "#FDB933";
-            case "high":
-            default:
-                return "#8DC63F";
+        if (user) {
+            loadHistory();
+        } else {
+            setLoading(false);
+            setError('Необходимо авторизоваться для просмотра истории');
         }
-    };
-
-    const getResultText = (resultLevel: string, percentage: number) => {
-        switch (resultLevel) {
-            case "low":
-                return `${Math.round(percentage)}% - ${t('history.result_levels.low')}`;
-            case "medium":
-                return `${Math.round(percentage)}% - ${t('history.result_levels.medium')}`;
-            case "high":
-            default:
-                return `${Math.round(percentage)}% - ${t('history.result_levels.high')}`;
-        }
-    };
+    }, [user]);
 
     if (loading) {
         return (
@@ -151,21 +179,21 @@ const History : React.FC = () => {
 
     return (
         <div className="bg-[#F2F5F9] w-screen h-screen px-4 py-6 flex flex-col gap-3">
+            {/* Заголовок */}
             <div className="relative flex items-center">
                 <Link 
                     href="/"
                     className="hover:cursor-pointer active:scale-[0.95] transition-all duration-300 w-[48px] h-[48px] rounded-full bg-[white] flex justify-center items-center"
                     style={{zIndex: 1}}
                 >
-                    					<Image src="/icons/back.svg" alt="Назад" width={10} height={14} style={{ width: 'auto', height: 'auto' }} />
+                    <Image src="/icons/back.svg" alt="Назад" width={10} height={14} style={{ width: 'auto', height: 'auto' }} />
                 </Link>
                 <div
                     className="pointer-events-none absolute left-0 right-0 text-[20px] text-center font-[600]"
                     style={{zIndex: 0}}
                 >
-                    {t('home.history')}
+                    История тестов
                 </div>
-
             </div>
 
             {/* Ошибка */}
@@ -175,43 +203,50 @@ const History : React.FC = () => {
                         <span>⚠️</span>
                         <p className="text-[14px]">{error}</p>
                     </div>
-                    <button
-                        onClick={async () => {
-                            setError(null);
-                            setLoading(true);
-                            try {
-                                // Попробуем авторизоваться заново
-                                const result = await autoLoginTestUser();
-                                if (result) {
-                                    // Перезагружаем страницу для обновления контекста
-                                    window.location.reload();
-                                }
-                            } catch (err) {
-                                setError('Не удалось авторизоваться. Попробуйте позже.');
-                                setLoading(false);
-                            }
-                        }}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-[14px] font-medium"
-                    >
-                        Попробовать снова
-                    </button>
+                </div>
+            )}
+
+            {/* Статистика */}
+            {historyData.length > 0 && (
+                <div className="bg-white rounded-[12px] p-4 mb-4">
+                    <h3 className="font-[600] text-[16px] text-[#1E1E1E] mb-3">📊 Статистика</h3>
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                            <div className="text-[24px] font-[700] text-[#8DC63F]">{historyData.length}</div>
+                            <div className="text-[12px] text-gray-600">Тестов пройдено</div>
+                        </div>
+                        <div>
+                            <div className="text-[24px] font-[700] text-[#8DC63F]">
+                                {Math.round(historyData.reduce((sum, item) => sum + item.percentage, 0) / historyData.length)}%
+                            </div>
+                            <div className="text-[12px] text-gray-600">Средний балл</div>
+                        </div>
+                    </div>
                 </div>
             )}
 
             {/* История тестов */}
             <div className="flex flex-col gap-3">
-                <h2 className="font-[600] text-[16px] text-[#1E1E1E]">{t('history.test_history')}</h2>
+                <h2 className="font-[600] text-[16px] text-[#1E1E1E]">
+                    🧠 История тестов ({historyData.length})
+                </h2>
                 
                 {historyData.length === 0 ? (
                     <div className="bg-white rounded-[12px] p-6 text-center">
                         <div className="text-4xl mb-2">📊</div>
-                        <p className="font-[600] text-[16px] text-[#1E1E1E] mb-1">{t('history.history_empty')}</p>
-                        <p className="text-[14px] text-gray-700">{t('history.history_empty_description')}</p>
+                        <p className="font-[600] text-[16px] text-[#1E1E1E] mb-1">История пуста</p>
+                        <p className="text-[14px] text-gray-700">Пройдите тесты, чтобы увидеть результаты здесь</p>
+                        <Link 
+                            href="/tests"
+                            className="inline-block mt-4 bg-[#8DC63F] text-white px-6 py-2 rounded-lg font-[500] hover:bg-[#7BB62D] transition-colors"
+                        >
+                            Пройти тесты
+                        </Link>
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-3">
-                        {historyData.map((item) => (
-                            <div key={item.id} className="bg-white rounded-[12px] p-4">
+                    <div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
+                        {historyData.map((item, index) => (
+                            <div key={`${item.id}-${index}`} className="bg-white rounded-[12px] p-4">
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex items-center gap-3">
                                         <div className="rounded-full w-[38px] h-[38px] bg-[#8DC63F] flex justify-center items-center">
@@ -219,10 +254,10 @@ const History : React.FC = () => {
                                         </div>
                                         <div>
                                             <h3 className="font-[600] text-[14px] text-[#1E1E1E]">
-                                                {item.testName}
+                                                {getTestName(item.testType, item.test)}
                                             </h3>
                                             <p className="text-[12px] text-gray-700">
-                                                {item.date}
+                                                {formatDate(item.completedAt)}
                                             </p>
                                         </div>
                                     </div>
@@ -238,7 +273,7 @@ const History : React.FC = () => {
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-700">📊</span>
                                         <span className="text-[13px] text-[#1E1E1E]">
-                                            {item.score} {t('history.score_from')} {item.maxScore}
+                                            {item.score} из {item.maxScore} баллов
                                         </span>
                                     </div>
                                     <div className="text-[12px] text-gray-700">

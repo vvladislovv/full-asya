@@ -47,11 +47,18 @@ export async function getTests() : Promise<Test[]> {
             return response;
         }
         
+        // Если backend вернул пустой объект, возвращаем пустой массив
+        if (response && typeof response === 'object' && Object.keys(response).length === 0) {
+            console.log('✅ Backend вернул пустые тесты');
+            return [];
+        }
+        
         console.warn('⚠️ Неожиданный формат ответа от backend:', response);
         return [];
     } catch (error) {
         console.error('❌ Ошибка загрузки тестов с backend:', error);
-        throw error;
+        // При ошибке возвращаем пустой массив
+        return [];
     }
 }
 export async function getTestByType(type: string) : Promise<Test> {
@@ -74,23 +81,37 @@ export async function getUserHistory(params?: { limit?: number; offset?: number 
         
         console.log('📋 История с backend:', response);
         
+        // Если backend вернул пустой объект или массив, возвращаем пустой массив
+        if (!response || (Array.isArray(response) && response.length === 0) || (typeof response === 'object' && Object.keys(response).length === 0)) {
+            console.log('✅ Backend вернул пустую историю, очищаем локальные данные');
+            // Очищаем локальные данные, так как backend пустой
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('test_results');
+                localStorage.removeItem('user_stats');
+            }
+            return [];
+        }
+        
         if (Array.isArray(response) && response.length > 0) {
             console.log('✅ Получено', response.length, 'результатов из БД');
             return response;
         }
+        
+        // Если response - объект с данными, преобразуем в массив
+        if (typeof response === 'object' && response !== null) {
+            const resultsArray = Object.values(response);
+            if (resultsArray.length > 0) {
+                console.log('✅ Получено', resultsArray.length, 'результатов из БД (объект)');
+                return resultsArray;
+            }
+        }
+        
+        return [];
     } catch (error) {
-        console.warn('Ошибка загрузки истории с backend, используем локальные данные:', error);
+        console.warn('Ошибка загрузки истории с backend:', error);
+        // При ошибке не используем локальные данные, возвращаем пустой массив
+        return [];
     }
-    
-    // Если backend не работает или нет данных, используем локальные
-    if (typeof window !== 'undefined') {
-        const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
-        const { limit = 50, offset = 0 } = params || {};
-        console.log('📱 Используем локальные данные:', localResults.length, 'результатов');
-        return localResults.slice(offset, offset + limit);
-    }
-    
-    return [];
 }
 
 // Получение статистики пользователя
@@ -117,39 +138,15 @@ export async function getUserStats(): Promise<UserStatsResponse> {
             return stats;
         }
     } catch (error) {
-        console.warn('Ошибка загрузки статистики с backend, используем локальные данные:', error);
+        console.warn('Ошибка загрузки статистики с backend:', error);
         console.error('Детали ошибки:', error);
     }
     
-    // Если backend не работает или нет данных, используем локальные
+    // Если backend не работает или нет данных, возвращаем пустую статистику
+    // и очищаем локальные данные
     if (typeof window !== 'undefined') {
-        const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
-        const completedTests = localResults.filter((r: any) => r.isCompleted);
-        const totalTests = completedTests.length;
-        
-        if (totalTests > 0) {
-            // Правильно рассчитываем средний балл как среднее от процентов
-            const totalPercentage = completedTests.reduce((sum: number, r: any) => sum + (r.percentage || 0), 0);
-            const averageScore = Math.round(totalPercentage / totalTests);
-            
-            const lastTestDate = completedTests[0].completedAt;
-            
-            console.log('📊 Локальная статистика:', {
-                totalTests: 8,
-                completedTests: totalTests,
-                averageScore,
-                lastTestDate,
-                totalPercentage
-            });
-            
-            return {
-                totalTests: 8, // Всего 8 тестов в системе
-                completedTests: totalTests,
-                averageScore,
-                lastTestDate,
-                riskLevel: 'low'
-            };
-        }
+        localStorage.removeItem('test_results');
+        localStorage.removeItem('user_stats');
     }
     
     return {
@@ -187,16 +184,9 @@ export async function startTest(testId: string) {
         return result;
     } catch (error) {
         console.error('❌ Ошибка начала теста:', error);
-        // Создаем локальный результат как fallback
-        const fallbackResult = {
-            id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            userId: 'local_user',
-            testId: testId,
-            isCompleted: false,
-            createdAt: new Date().toISOString()
-        };
-        console.log('📱 Создан локальный fallback результат:', fallbackResult);
-        return fallbackResult;
+        // При ошибке backend НЕ создаем локальные fallback данные
+        // чтобы избежать проблем с синхронизацией
+        throw new Error(`Не удалось начать тест: ${error}`);
     }
 }
 
@@ -207,7 +197,6 @@ export async function submitTestResult(data: {
     timeSpent: number;
     maxScore?: number;
     emotionalState?: Record<string, any>;
-    testType?: string;
 }) {
     console.log('📤 Отправка результата теста:', data);
     
@@ -238,64 +227,20 @@ export async function submitTestResult(data: {
         
         console.log('✅ Результат отправлен на backend:', backendResult);
         
-        // Если backend успешно принял результат, сохраняем локально для синхронизации
-        if (typeof window !== 'undefined') {
-            const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
-            
-            const newResult = {
-                id: data.resultId,
-                createdAt: new Date().toISOString(),
-                completedAt: new Date().toISOString(),
-                testType: data.testType || 'UNKNOWN',
-                score: correctAnswers,
-                maxScore: totalAnswers,
-                percentage: percentage,
-                isCompleted: true,
-                resultLevel: resultLevel,
-                timeSpent: data.timeSpent,
-                details: data.answers
-            };
-            
-            localResults.unshift(newResult);
-            localStorage.setItem('test_results', JSON.stringify(localResults));
-            console.log('✅ Результат синхронизирован локально:', newResult);
-            
-            // Обновляем общую статистику
-            updateLocalStats();
-        }
+        // Если backend успешно принял результат, НЕ сохраняем локально
+        // Backend является основным источником данных
+        console.log('✅ Результат отправлен на backend, локальное сохранение отключено');
         
         return backendResult;
     } catch (error) {
-        console.warn('⚠️ Не удалось отправить результат на backend, сохраняем локально:', error);
+        console.warn('⚠️ Не удалось отправить результат на backend:', error);
         
-        // ВСЕГДА сохраняем результат локально для отображения в истории
-        if (typeof window !== 'undefined') {
-            const localResults = JSON.parse(localStorage.getItem('test_results') || '[]');
-            
-            const newResult = {
-                id: data.resultId,
-                createdAt: new Date().toISOString(),
-                completedAt: new Date().toISOString(),
-                testType: data.testType || 'UNKNOWN',
-                score: correctAnswers,
-                maxScore: totalAnswers,
-                percentage: percentage,
-                isCompleted: true,
-                resultLevel: resultLevel,
-                timeSpent: data.timeSpent,
-                details: data.answers
-            };
-            
-            localResults.unshift(newResult);
-            localStorage.setItem('test_results', JSON.stringify(localResults));
-            console.log('✅ Результат сохранен локально (fallback):', newResult);
-            
-            // Обновляем общую статистику
-            updateLocalStats();
-        }
+        // При ошибке backend НЕ сохраняем локально, чтобы избежать дублирования
+        // данных и проблем с синхронизацией
+        console.log('❌ Локальное сохранение отключено для избежания дублирования данных');
         
-        // Возвращаем локальный результат
-        return { id: data.resultId, success: true, local: true };
+        // Возвращаем ошибку
+        throw new Error(`Не удалось отправить результат на backend: ${error}`);
     }
 }
 

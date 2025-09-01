@@ -41,7 +41,7 @@ export class HistoryService {
     const { testType, period } = getHistoryStatsDto;
 
     // Определяем дату начала периода
-    let startDate: Date;
+    let startDate: Date | undefined;
     const now = new Date();
     
     switch (period) {
@@ -56,7 +56,7 @@ export class HistoryService {
         break;
       case 'all':
       default:
-        startDate = new Date(0);
+        startDate = undefined; // Для периода 'all' не ограничиваем по дате
         break;
     }
 
@@ -64,9 +64,7 @@ export class HistoryService {
     const whereConditions = {
       userId,
       isCompleted: true,
-      completedAt: {
-        gte: startDate,
-      },
+      ...(startDate && { completedAt: { gte: startDate } }), // Добавляем условие по дате только если startDate определен
       ...(testType && { testType }),
     };
 

@@ -69,8 +69,7 @@ const VisualMemoryGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, curre
                 },
                 timeSpent,
                 maxScore: totalAnswers,
-                emotionalState: { mood: 'neutral' },
-                testType: 'VISUAL_MEMORY'
+                emotionalState: { mood: 'neutral' }
             });
             console.log('Результат теста отправлен успешно');
         } catch (error) {

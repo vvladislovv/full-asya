@@ -164,18 +164,17 @@ const Tests: React.FC = () => {
         
         getTests()
             .then((res: Test[]) => {
-                const arr = Array.isArray(res) ? res : Object.values(res);
-                if (arr && arr.length > 0) {
-                    // console.log("✅ Получены тесты с API:", arr.length);
-                    setTests(arr as Test[]);
+                if (res && res.length > 0) {
+                    console.log("✅ Получены тесты с API:", res.length, res);
+                    setTests(res);
                 } else {
-                    // console.log("⚠️ API вернул пустой массив, используем fallback тесты");
-                    setTests(createFallbackTests());
+                    console.log("⚠️ API вернул пустой массив, тесты недоступны");
+                    setTests([]);
                 }
             })
             .catch((error) => {
-                // console.log("❌ API недоступен, используем fallback тесты:", error);
-                setTests(createFallbackTests());
+                console.log("❌ API недоступен:", error);
+                setTests([]);
             })
             .finally(() => setLoading(false));
     }, [authLoading, t]); // Добавлена зависимость от переводов

@@ -89,8 +89,7 @@ const SymbolMemoryGame: React.FC<MemoryGameProps> = ({currentTestIndex, setCurre
                     percentage: percentage
                 },
                 timeSpent,
-                maxScore: totalAnswers,
-                testType: 'SYMBOL_MEMORY'
+                maxScore: totalAnswers
             });
             
             console.log('✅ Результат теста успешно отправлен:', submitResult);

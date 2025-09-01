@@ -77,8 +77,7 @@ const VerbalMemoryGame: React.FC<MemoryGameProps> = ({setCurrentTestIndex, curre
                     details: answers
                 },
                 timeSpent,
-                maxScore: totalAnswers,
-                testType: 'VERBAL_MEMORY'
+                maxScore: totalAnswers
             });
         } catch (error) {
             console.error('Ошибка отправки результатов:', error);
