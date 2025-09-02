@@ -37,8 +37,8 @@ export interface TelegramWebApp {
 
 // Получение данных Telegram Mini App
 export function getTelegramData(): TelegramWebApp | null {
-    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
-        return (window as any).Telegram.WebApp;
+    if (typeof window !== 'undefined' && (window as unknown as { Telegram?: { WebApp?: TelegramWebApp } }).Telegram?.WebApp) {
+        return (window as unknown as { Telegram: { WebApp: TelegramWebApp } }).Telegram.WebApp;
     }
     return null;
 }

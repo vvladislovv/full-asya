@@ -1,4 +1,4 @@
-import { API_URL } from "@/settings";
+// import { API_URL } from "@/settings"; // Удалено, используем process.env.NEXT_PUBLIC_API_URL
 
 // Автоматическая авторизация тестового пользователя
 async function ensureAuthenticated(): Promise<string | null> {
@@ -8,7 +8,8 @@ async function ensureAuthenticated(): Promise<string | null> {
     if (!access_token) {
         console.log('🔑 Токен отсутствует, выполняем автоматическую авторизацию...');
         try {
-            const response = await fetch(`${API_URL}/auth/login`, {
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const response = await fetch(`${baseUrl}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -36,13 +37,17 @@ export async function apiFetch<T>(
 ): Promise<T> {
     const access_token = await ensureAuthenticated();
     
-    const res = await fetch(`${API_URL}${endpoint}`, {
+    // Используем правильный базовый URL
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+    
+    const res = await fetch(`${baseUrl}${endpoint}`, {
         ...options,
         headers: {
             ...(access_token && { "Authorization": `Bearer ${access_token}` }),
             "Content-Type": "application/json",
             ...(options?.headers || {})
         },
+        credentials: 'include',
     });
     
     // Если получили 401, попробуем переавторизоваться один раз
@@ -52,7 +57,7 @@ export async function apiFetch<T>(
         const newToken = await ensureAuthenticated();
         
         if (newToken) {
-            const retryRes = await fetch(`${API_URL}${endpoint}`, {
+            const retryRes = await fetch(`${baseUrl}${endpoint}`, {
                 ...options,
                 headers: {
                     "Authorization": `Bearer ${newToken}`,

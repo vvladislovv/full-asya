@@ -7,6 +7,16 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   
+  // Настройки для работы с API
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.BACKEND_URL || 'http://localhost:3000'}/api/:path*`,
+      },
+    ];
+  },
+  
   // Настройки для стабильной гидратации
   compiler: {
     // Отключаем некоторые оптимизации, которые могут вызывать проблемы

@@ -187,16 +187,60 @@ export default function RootLayout({
                   // Включаем подтверждение закрытия
                   tg.enableClosingConfirmation();
                   
-                  // console.log('🔗 Telegram WebApp инициализирован');
-                  // console.log('👤 Пользователь:', tg.initDataUnsafe?.user);
-                  // console.log('💬 Чат:', tg.initDataUnsafe?.chat);
-                  // console.log('🎨 Тема:', tg.colorScheme);
-                  // console.log('📱 Платформа:', tg.platform);
+                  console.log('🔗 Telegram WebApp инициализирован');
+                  console.log('👤 Пользователь:', tg.initDataUnsafe?.user);
+                  console.log('💬 Чат:', tg.initDataUnsafe?.chat);
+                  console.log('🎨 Тема:', tg.colorScheme);
+                  console.log('📱 Платформа:', tg.platform);
+                  console.log('📊 Init Data:', tg.initData);
+                  
+                  // Отправляем данные на сервер при загрузке
+                  if (tg.initData && tg.initDataUnsafe?.user) {
+                    console.log('📤 Отправляем данные Telegram на сервер...');
+                    
+                    // Отправляем данные авторизации
+                    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+                    fetch(\`\${baseUrl}/auth/telegram-mini-app\`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        initData: tg.initData,
+                        user: tg.initDataUnsafe.user,
+                        hash: extractHashFromInitData(tg.initData)
+                      })
+                    })
+                    .then(response => {
+                      if (response.ok) {
+                        console.log('✅ Данные Telegram успешно отправлены на сервер');
+                        return response.json();
+                      } else {
+                        throw new Error(\`HTTP \${response.status}\`);
+                      }
+                    })
+                    .then(data => {
+                      console.log('🔑 Получен токен авторизации:', data.access_token);
+                      if (data.access_token) {
+                        localStorage.setItem('access_token', data.access_token);
+                        localStorage.setItem('telegram_user', JSON.stringify(tg.initDataUnsafe.user));
+                      }
+                    })
+                    .catch(error => {
+                      console.error('❌ Ошибка отправки данных Telegram:', error);
+                    });
+                  }
                 } catch (error) {
                   console.warn('⚠️ Ошибка инициализации Telegram WebApp:', error);
                 }
               } else {
-                // console.log('🌐 Работаем в обычном веб-режиме');
+                console.log('🌐 Работаем в обычном веб-режиме');
+              }
+              
+              // Функция извлечения hash из initData
+              function extractHashFromInitData(initData) {
+                const urlParams = new URLSearchParams(initData);
+                return urlParams.get('hash');
               }
               
               // Очистка при размонтировании

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DrAsya - Cognitive Tests</title>
+    <meta name="description" content="Cognitive assessment and training platform">
+    
+    <!-- Telegram WebApp Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Telegram WebApp Initialization -->
+    <script>
+        // Инициализация Telegram WebApp
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+            const tg = window.Telegram.WebApp;
+            
+            // Инициализация
+            tg.ready();
+            tg.expand();
+            
+            // Настройка темы
+            if (tg.colorScheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+            
+            // Настройка цветов интерфейса
+            tg.setHeaderColor('#E8ECF5');
+            tg.setBackgroundColor('#E8ECF5');
+            
+            // Включаем подтверждение закрытия
+            tg.enableClosingConfirmation();
+            
+            // Логируем данные для отладки
+            console.log('🔗 Telegram WebApp инициализирован');
+            console.log('👤 Пользователь:', tg.initDataUnsafe?.user);
+            console.log('💬 Чат:', tg.initDataUnsafe?.chat);
+            console.log('🎨 Тема:', tg.colorScheme);
+            console.log('📱 Платформа:', tg.platform);
+            console.log('📊 Init Data:', tg.initData);
+            
+            // Отправляем данные на сервер при загрузке
+            if (tg.initData && tg.initDataUnsafe?.user) {
+                console.log('📤 Отправляем данные Telegram на сервер...');
+                
+                // Отправляем данные авторизации
+                fetch('/api/auth/telegram-mini-app', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        initData: tg.initData,
+                        user: tg.initDataUnsafe.user,
+                        hash: extractHashFromInitData(tg.initData)
+                    })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('✅ Данные Telegram успешно отправлены на сервер');
+                        return response.json();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    console.log('🔑 Получен токен авторизации:', data.access_token);
+                    if (data.access_token) {
+                        localStorage.setItem('access_token', data.access_token);
+                        localStorage.setItem('telegram_user', JSON.stringify(tg.initDataUnsafe.user));
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Ошибка отправки данных Telegram:', error);
+                });
+            }
+        } else {
+            console.log('🌐 Работаем в обычном веб-режиме (не в Telegram)');
+        }
+        
+        // Функция извлечения hash из initData
+        function extractHashFromInitData(initData) {
+            const urlParams = new URLSearchParams(initData);
+            return urlParams.get('hash');
+        }
+        
+        // Обработка ошибок сети
+        window.addEventListener('error', function(e) {
+            if (e.message.includes('Failed to load resource')) {
+                console.warn('⚠️ Ошибка загрузки ресурса:', e.message);
+            }
+        });
+        
+        // Обработка ошибок CORS
+        window.addEventListener('unhandledrejection', function(e) {
+            if (e.reason && e.reason.message && e.reason.message.includes('CORS')) {
+                console.warn('⚠️ CORS ошибка:', e.reason.message);
+            }
+        });
+    </script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #E8ECF5;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #E8ECF5;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #8DC63F;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .telegram-notice {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #0088cc;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Уведомление для пользователей вне Telegram -->
+    <div id="telegram-notice" class="telegram-notice" style="display: none;">
+        Откройте приложение через Telegram для полного функционала
+    </div>
+    
+    <div id="root">
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Показываем уведомление если не в Telegram
+        if (!window.Telegram?.WebApp) {
+            document.getElementById('telegram-notice').style.display = 'block';
+        }
+        
+        // Скрываем загрузку через 2 секунды
+        setTimeout(() => {
+            const loading = document.querySelector('.loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
